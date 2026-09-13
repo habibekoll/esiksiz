@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Switch } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { useAccessibility, MODES } from '../context/AccessibilityContext';
-import { Eye, Volume2, Sparkles, LayoutGrid, Check, ArrowLeft, RefreshCcw } from 'lucide-react-native';
+import { Eye, Ear, Sparkles, LayoutGrid, Check, ArrowLeft, RefreshCcw } from 'lucide-react-native';
 
 export const AccessibilitySettingsScreen = ({ onBack, onResetToOnboarding }) => {
   const {
@@ -10,8 +10,6 @@ export const AccessibilitySettingsScreen = ({ onBack, onResetToOnboarding }) => 
     theme,
     fontSizeScale,
     setFontSizeScale,
-    adaptiveEngineActive,
-    setAdaptiveEngineActive,
   } = useAccessibility();
 
   const colors = theme.colors;
@@ -20,26 +18,26 @@ export const AccessibilitySettingsScreen = ({ onBack, onResetToOnboarding }) => 
   const modeList = [
     {
       id: MODES.VISUAL,
-      title: 'Görme Desteği & Yüksek Kontrast',
-      desc: '16:1 kontrast (Siyah/Sarı), büyük dokunmatik butonlar ve sesli görsel betimleme.',
+      title: 'Görme Desteği (Sesli Okuma & Betimleme)',
+      desc: 'Hem paylaşılan yazıyı hem de görseli sesli dinleme imkânı, 16:1 kontrastlı sarı-siyah zemin.',
       icon: Eye,
     },
     {
       id: MODES.HEARING,
-      title: 'İşitme Desteği & Altyazı',
-      desc: 'Videolarda otomatik senkronize Türkçe altyazı ve görsel göstergeler.',
-      icon: Volume2,
+      title: 'İşitme Desteği (Ses & Ortam Betimlemesi)',
+      desc: 'Duyulamayan çevresel seslerin (müzik, alkış, efektler) detaylı metin betimlemesi ve altyazı.',
+      icon: Ear,
     },
     {
       id: MODES.NEURO,
       title: 'Nörogelişimsel Sakin Mod (DEHB / Otizm)',
-      desc: 'Bionic Reading, sıfır animasyon, pastel tonlar ve sade tek sütun.',
+      desc: 'Bionic Reading ile hızlı odaklanma, sıfır animasyon ve sadeleştirilmiş sakin akış.',
       icon: Sparkles,
     },
     {
       id: MODES.STANDARD,
       title: 'Standart Görünüm',
-      desc: 'NSosyal varsayılan modern tasarım ve akışı.',
+      desc: 'NSosyal varsayılan modern tasarım ve arayüzü.',
       icon: LayoutGrid,
     },
   ];
@@ -48,6 +46,7 @@ export const AccessibilitySettingsScreen = ({ onBack, onResetToOnboarding }) => 
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
       accessible={true}
       accessibilityRole="region"
       accessibilityLabel="Erişilebilirlik ve Deneyim Ayarları"
@@ -69,14 +68,14 @@ export const AccessibilitySettingsScreen = ({ onBack, onResetToOnboarding }) => 
           </TouchableOpacity>
         )}
         <Text style={[styles.headerTitle, { color: colors.text }]}>
-          Erişilebilirlik & Deneyim Modu
+          Erişilebilirlik ve Görünüm
         </Text>
       </View>
 
       {/* 1. Deneyim Modu Seçimi */}
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
-          AKTİF MODU DEĞİŞTİR (UYGULAMA ANINDA DÖNÜŞÜR)
+          AKTİF MODU DEĞİŞTİR
         </Text>
 
         <View style={styles.cardGroup}>
@@ -196,7 +195,7 @@ export const AccessibilitySettingsScreen = ({ onBack, onResetToOnboarding }) => 
         </View>
       </View>
 
-      {/* 3. Başlangıç Seçim Ekranına Dönüş (Jüriye Baştan Göstermek İçin) */}
+      {/* 3. Başlangıç Seçim Ekranına Dönüş */}
       {onResetToOnboarding && (
         <TouchableOpacity
           onPress={onResetToOnboarding}
