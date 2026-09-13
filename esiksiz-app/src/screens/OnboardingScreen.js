@@ -2,14 +2,13 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Platform, TouchableWithoutFeedback } from 'react-native';
 import { useAccessibility, MODES } from '../context/AccessibilityContext';
 import { SpeechService } from '../services/speechService';
-import { Eye, Ear, Sparkles, LayoutGrid, ChevronRight, HandMetal, ShieldCheck, Volume2 } from 'lucide-react-native';
+import { Eye, Ear, Sparkles, LayoutGrid, ChevronRight, HandMetal, Volume2 } from 'lucide-react-native';
 
 export const OnboardingScreen = ({ onComplete }) => {
   const { selectMode } = useAccessibility();
   const hasSpokenWelcomeRef = useRef(false);
   const lastTapRef = useRef(0);
 
-  // Açılışta Sesli Yönlendirme (Görme engelli kullanıcının modu görmeden seçebilmesi için)
   useEffect(() => {
     if (!hasSpokenWelcomeRef.current) {
       hasSpokenWelcomeRef.current = true;
@@ -20,7 +19,6 @@ export const OnboardingScreen = ({ onComplete }) => {
       }, 500);
     }
 
-    // Klavye kısayolu (Web için)
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
       const handleKeyDown = (e) => {
         if (e.key === '1' || e.key === 'g' || e.key === 'G' || e.code === 'Space') {
@@ -41,11 +39,9 @@ export const OnboardingScreen = ({ onComplete }) => {
     onComplete();
   };
 
-  // Ekrana Çift Dokunma (Double Tap Anywhere) Algılayıcı
   const handleDoubleTapAnywhere = () => {
     const now = Date.now();
     if (now - lastTapRef.current < 450) {
-      // Çift tık algılandı! Doğrudan Görme Moduna Geç
       handleChooseMode(MODES.VISUAL);
     }
     lastTapRef.current = now;
@@ -53,7 +49,7 @@ export const OnboardingScreen = ({ onComplete }) => {
 
   const playVoiceInstructions = () => {
     SpeechService.speak(
-      'Seçim Menüsü: 1. Görme desteği modu, 16:1 kontrast ve sesli görsel betimleme. 2. İşitme desteği modu, altyazı ve işaret dili. 3. Nörogelişimsel sakin mod, biyonik okuma ve odak cetveli. Seçmek için ekrana iki kez dokunun veya kartlara tıklayın.'
+      'Seçim Menüsü: 1. Görme desteği modu, sesli görsel betimleme. 2. İşitme desteği modu, altyazı ve işaret dili. 3. Nörogelişimsel sakin mod, biyonik okuma ve odak cetveli. Seçmek için ekrana iki kez dokunun veya kartlara tıklayın.'
     );
   };
 
@@ -69,23 +65,16 @@ export const OnboardingScreen = ({ onComplete }) => {
       >
         {/* Şık Başlık Alanı */}
         <View style={styles.headerArea}>
-          <View style={styles.brandRow}>
-            <Text style={styles.brandText}>
-              N<Text style={{ color: '#2563EB' }}>Sosyal</Text>
-            </Text>
-            <View style={styles.badgePill}>
-              <ShieldCheck size={12} color="#2563EB" />
-              <Text style={styles.badgePillText}>EŞİKSİZ ERİŞİLEBİLİRLİK</Text>
-            </View>
-          </View>
-
+          <Text style={styles.brandText}>
+            N<Text style={{ color: '#2563EB' }}>Sosyal</Text>
+          </Text>
           <Text style={styles.mainTitle}>Nasıl Bir Deneyim İstersiniz?</Text>
           <Text style={styles.subTitle}>
-            Seçtiğiniz profile göre uygulamanın tipografisi, renkleri ve etkileşim mantığı anında o dünyanın kurallarına bürünür.
+            İhtiyacınıza uygun modu seçin; uygulama anında o dünyanın kurallarına bürünsün.
           </Text>
         </View>
 
-        {/* GÖRME ENGELLİ SESLİ ÇAĞRI BANNER'I */}
+        {/* SESLİ ÇAĞRI BANNER'I */}
         <TouchableOpacity
           onPress={playVoiceInstructions}
           style={styles.voiceAssistantPrompt}
@@ -95,9 +84,9 @@ export const OnboardingScreen = ({ onComplete }) => {
         >
           <Volume2 size={18} color="#1D4ED8" />
           <View style={{ flex: 1 }}>
-            <Text style={styles.voicePromptTitle}>🔊 Sesli Karşılama ve Yönlendirme</Text>
+            <Text style={styles.voicePromptTitle}>🔊 Sesli Yönlendirmeyi Dinle</Text>
             <Text style={styles.voicePromptSub}>
-              Görme modu için ekrana 2 kez dokunun veya Boşluk / 1 tuşuna basın.
+              Görme modu için ekrana 2 kez dokunun veya Boşluk tuşuna basın.
             </Text>
           </View>
         </TouchableOpacity>
@@ -111,21 +100,21 @@ export const OnboardingScreen = ({ onComplete }) => {
             activeOpacity={0.85}
             accessible={true}
             accessibilityRole="button"
-            accessibilityLabel="Görme Desteği Modu. Seçmek için dokunun veya 1 tuşuna basın."
+            accessibilityLabel="Görme Desteği Modu."
           >
             <View style={styles.cardHeader}>
               <View style={[styles.iconPill, { backgroundColor: '#FFE600' }]}>
                 <Eye size={22} color="#000000" />
               </View>
               <View style={styles.tagYellow}>
-                <Text style={styles.tagYellowText}>16.1:1 KONTRAST • 555nm SARI</Text>
+                <Text style={styles.tagYellowText}>GÖRME DESTEĞİ</Text>
               </View>
             </View>
             <Text style={[styles.cardTitle, { color: '#FFE600' }]}>
-              Görme Desteği & Sesli Betimleme (Kısayol: 1 / Çift Tık)
+              Görme Desteği & Sesli Betimleme
             </Text>
             <Text style={[styles.cardDescription, { color: '#FFFFFF' }]}>
-              Oftalmolojik 16.1:1 rekor kontrastla ışık parlamasını (fotofobi) sıfırlayan saf siyah zemin. Karta tek dokunuşla yazar, metin ve yapay zekâ görsel açıklamasını kesintisiz dinleyin.
+              Saf siyah zemin, canlı sarı ve beyaz yüksek kontrast. Karta tek dokunuşla yazar, metin ve yapay zekâ görsel açıklamasını kesintisiz dinleyin.
             </Text>
             <View style={styles.actionPromptRow}>
               <Text style={[styles.actionPromptText, { color: '#FFE600' }]}>Bu Modla Başla 👉</Text>
@@ -140,21 +129,21 @@ export const OnboardingScreen = ({ onComplete }) => {
             activeOpacity={0.85}
             accessible={true}
             accessibilityRole="button"
-            accessibilityLabel="İşitme Desteği Modu. Seçmek için dokunun veya 2 tuşuna basın."
+            accessibilityLabel="İşitme Desteği Modu."
           >
             <View style={styles.cardHeader}>
               <View style={[styles.iconPill, { backgroundColor: '#0284C7' }]}>
                 <Ear size={22} color="#FFFFFF" />
               </View>
               <View style={styles.tagBlue}>
-                <Text style={styles.tagBlueText}>ALTYAZI + TİD</Text>
+                <Text style={styles.tagBlueText}>İŞİTME DESTEĞİ</Text>
               </View>
             </View>
             <Text style={[styles.cardTitle, { color: '#0369A1' }]}>
-              İşitme Desteği & Ortam Sesleri (Kısayol: 2)
+              İşitme Desteği & Ortam Sesleri
             </Text>
             <Text style={[styles.cardDescription, { color: '#334155' }]}>
-              Duyulamayan çevresel seslerin (müzik, alkış, efektler) detaylı metin betimlemesi, senkronize altyazı ve Türk İşaret Dili (TİD) avatarı.
+              Duyulamayan çevresel seslerin (müzik, alkış, efektler) detaylı metin betimlemesi, altyazı ve Türk İşaret Dili (TİD) avatarı.
             </Text>
             <View style={styles.actionPromptRow}>
               <Text style={[styles.actionPromptText, { color: '#0284C7' }]}>Bu Modla Başla 👉</Text>
@@ -169,21 +158,21 @@ export const OnboardingScreen = ({ onComplete }) => {
             activeOpacity={0.85}
             accessible={true}
             accessibilityRole="button"
-            accessibilityLabel="Nörogelişimsel Sakin Mod. Seçmek için dokunun veya 3 tuşuna basın."
+            accessibilityLabel="Nörogelişimsel Sakin Mod."
           >
             <View style={styles.cardHeader}>
               <View style={[styles.iconPill, { backgroundColor: '#0D9488' }]}>
                 <Sparkles size={22} color="#FFFFFF" />
               </View>
               <View style={styles.tagTeal}>
-                <Text style={styles.tagTealText}>BIONIC READING + ODAK</Text>
+                <Text style={styles.tagTealText}>SAKİN MOD</Text>
               </View>
             </View>
             <Text style={[styles.cardTitle, { color: '#0F766E' }]}>
               Nörogelişimsel Sakin Mod (DEHB / Otizm)
             </Text>
             <Text style={[styles.cardDescription, { color: '#334155' }]}>
-              Kelimelerin baş harflerini kalınlaştıran Biyonik Okuma, satır kaydırmayı engelleyen odak cetveli ve duyusal yorgunluğu arındıran sade akış.
+              Kelimelerin baş harflerini belirginleştiren Biyonik Okuma, satır takip cetveli ve duyusal yorgunluğu arındıran sade akış.
             </Text>
             <View style={styles.actionPromptRow}>
               <Text style={[styles.actionPromptText, { color: '#0D9488' }]}>Bu Modla Başla 👉</Text>
@@ -191,7 +180,7 @@ export const OnboardingScreen = ({ onComplete }) => {
             </View>
           </TouchableOpacity>
 
-          {/* 4. FİZİKSEL / MOTOR BECERİ (EL TİTREMESİ, PARKINSON) */}
+          {/* 4. FİZİKSEL / MOTOR BECERİ */}
           <TouchableOpacity
             onPress={() => handleChooseMode(MODES.MOTOR)}
             style={[styles.card, styles.cardMotor]}
@@ -205,14 +194,14 @@ export const OnboardingScreen = ({ onComplete }) => {
                 <HandMetal size={22} color="#FFFFFF" />
               </View>
               <View style={styles.tagPurple}>
-                <Text style={styles.tagPurpleText}>56px+ DEV DOKUNMA</Text>
+                <Text style={styles.tagPurpleText}>KOLAY DOKUNMA</Text>
               </View>
             </View>
             <Text style={[styles.cardTitle, { color: '#6B21A8' }]}>
               Fiziksel & Motor Beceri Desteği
             </Text>
             <Text style={[styles.cardDescription, { color: '#334155' }]}>
-              Titreyen veya hassas hareket kısıtı olan eller için 56px dev dokunma hedefleri, geniş tıklama toleransı ve basitleştirilmiş arayüz.
+              Titreyen veya hareket kısıtı olan eller için geniş dokunma hedefleri, yüksek tıklama toleransı ve basitleştirilmiş arayüz.
             </Text>
             <View style={styles.actionPromptRow}>
               <Text style={[styles.actionPromptText, { color: '#7C3AED' }]}>Bu Modla Başla 👉</Text>
@@ -234,7 +223,7 @@ export const OnboardingScreen = ({ onComplete }) => {
                 <LayoutGrid size={22} color="#FFFFFF" />
               </View>
               <View style={styles.tagSlate}>
-                <Text style={styles.tagSlateText}>KLASİK AKIŞ</Text>
+                <Text style={styles.tagSlateText}>STANDART</Text>
               </View>
             </View>
             <Text style={[styles.cardTitle, { color: '#1E293B' }]}>
@@ -266,34 +255,12 @@ const styles = StyleSheet.create({
   headerArea: {
     marginBottom: 14,
   },
-  brandRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 10,
-  },
   brandText: {
     fontSize: 26,
     fontWeight: '900',
     color: '#0F172A',
     letterSpacing: -0.5,
-  },
-  badgePill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#EFF6FF',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#BFDBFE',
-  },
-  badgePillText: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#1D4ED8',
-    letterSpacing: 0.5,
+    marginBottom: 6,
   },
   mainTitle: {
     fontSize: 20,

@@ -42,21 +42,21 @@ function NotificationsPlaceholderScreen() {
   );
 }
 
-// Jüri Canlı Sunumu İçin Hızlı Mod Değiştirme Çubuğu
+// Şık ve Doğal Kategori Seçici Barı
 function LiveModeBar({ onOpenOnboarding }) {
   const { currentMode, selectMode, theme } = useAccessibility();
   const isVisual = theme.isVisual;
 
   const modes = [
-    { id: MODES.VISUAL, label: '🟡 Görme (16:1)', icon: Eye },
-    { id: MODES.HEARING, label: '🤟 İşitme & TİD', icon: Ear },
-    { id: MODES.NEURO, label: '🧠 DEHB & Odak', icon: Sparkles },
-    { id: MODES.MOTOR, label: '✋ Motor', icon: HandMetal },
+    { id: MODES.VISUAL, label: '🟡 Görme Desteği', icon: Eye },
+    { id: MODES.HEARING, label: '🤟 İşitme Desteği', icon: Ear },
+    { id: MODES.NEURO, label: '🧠 Sakin Mod', icon: Sparkles },
+    { id: MODES.MOTOR, label: '✋ Kolay Dokunma', icon: HandMetal },
     { id: MODES.STANDARD, label: '🌐 Standart', icon: LayoutGrid },
   ];
 
   return (
-    <View style={[styles.liveModeContainer, { backgroundColor: isVisual ? '#0A0A0A' : '#F1F5F9', borderBottomColor: isVisual ? '#FFE600' : '#E2E8F0' }]}>
+    <View style={[styles.liveModeContainer, { backgroundColor: isVisual ? '#0A0A0A' : '#F8FAFC', borderBottomColor: isVisual ? '#FFE600' : '#E2E8F0' }]}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.liveModeScroll}>
         {modes.map((m) => {
           const isCurrent = currentMode === m.id;
@@ -74,7 +74,7 @@ function LiveModeBar({ onOpenOnboarding }) {
                     : isVisual
                     ? '#171717'
                     : '#FFFFFF',
-                  borderColor: isCurrent ? (isVisual ? '#FFE600' : '#2563EB') : (isVisual ? '#333333' : '#CBD5E1'),
+                  borderColor: isCurrent ? (isVisual ? '#FFE600' : '#2563EB') : (isVisual ? '#333333' : '#E2E8F0'),
                 },
               ]}
               accessible={true}
@@ -91,8 +91,8 @@ function LiveModeBar({ onOpenOnboarding }) {
                         : '#FFFFFF'
                       : isVisual
                       ? '#FFE600'
-                      : '#334155',
-                    fontWeight: isCurrent ? '900' : '700',
+                      : '#475569',
+                    fontWeight: isCurrent ? '800' : '600',
                   },
                 ]}
               >
@@ -105,14 +105,14 @@ function LiveModeBar({ onOpenOnboarding }) {
         {/* Karşılama Ekranına Dönüş Butonu */}
         <TouchableOpacity
           onPress={onOpenOnboarding}
-          style={[styles.onbResetBtn, { borderColor: isVisual ? '#FFE600' : '#94A3B8' }]}
+          style={[styles.onbResetBtn, { borderColor: isVisual ? '#FFE600' : '#CBD5E1' }]}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="Karşılama ekranını aç"
+          accessibilityLabel="Karşılama ekranına dön"
         >
           <RotateCcw size={12} color={isVisual ? '#FFE600' : '#64748B'} />
           <Text style={[styles.onbResetText, { color: isVisual ? '#FFE600' : '#64748B' }]}>
-            Giriş Ekranı
+            Giriş
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -122,7 +122,7 @@ function LiveModeBar({ onOpenOnboarding }) {
 
 function MainApp() {
   const { currentMode, selectMode, theme } = useAccessibility();
-  // Sunum için doğrudan feed ekranında başlar!
+  // Doğrudan ana akışta Görme Engelli Modu ile açılır!
   const [isOnboarding, setIsOnboarding] = useState(false);
   const [activeTab, setActiveTab] = useState('feed');
   const [posts, setPosts] = useState(INITIAL_POSTS);
@@ -217,7 +217,7 @@ function MainApp() {
           </View>
         )}
 
-        {/* 1. EĞER KULLANICI İSTERSE GİRİŞ / TANITIM EKRANI */}
+        {/* 1. GİRİŞ / TANITIM EKRANI */}
         {isOnboarding ? (
           <OnboardingScreen
             onComplete={() => {
@@ -226,13 +226,13 @@ function MainApp() {
             }}
           />
         ) : (
-          /* 2. ANA UYGULAMA (GÖRME ENGELLİ 16:1 MODUYLA BAŞLAR) */
+          /* 2. ANA UYGULAMA (GÖRME ENGELLİ DOĞAL MODUYLA BAŞLAR) */
           <>
             {/* Üst Çubuk */}
             {activeTab !== 'settings' && activeTab !== 'create' && (
               <>
                 <Header onOpenAccessibility={() => setActiveTab('settings')} />
-                {/* Jüri Canlı Mod Seçici Çubuğu */}
+                {/* Mod Seçici Çubuğu */}
                 <LiveModeBar onOpenOnboarding={() => setIsOnboarding(true)} />
               </>
             )}
@@ -383,9 +383,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   liveModeBtn: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 11,
     paddingVertical: 6,
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1,
   },
   liveModeBtnText: {
@@ -396,8 +396,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     paddingHorizontal: 8,
-    paddingVertical: 5,
-    borderRadius: 8,
+    paddingVertical: 6,
+    borderRadius: 10,
     borderWidth: 1,
     borderStyle: 'dashed',
     marginLeft: 4,
