@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { useAccessibility } from '../context/AccessibilityContext';
 import { SpeechService } from '../services/speechService';
-import { Volume2, VolumeX, Heart, MessageCircle, Share2, Sparkles, Play, Pause, Bookmark, Ear, Music, UserCheck } from 'lucide-react-native';
+import { Volume2, VolumeX, Heart, MessageCircle, Share2, Sparkles, Play, Pause, Bookmark, Ear, Music, CheckCircle2 } from 'lucide-react-native';
 
 export const FeedCard = ({ post }) => {
   const { theme, fontSizeScale, bionicReading, tidActive, focusRulerActive } = useAccessibility();
@@ -42,7 +42,7 @@ export const FeedCard = ({ post }) => {
       if (post.image && post.aiDescription) {
         fullSpeech += `Paylaşılan görselin betimlemesi: ${post.aiDescription}`;
       } else if (post.videoUrl) {
-        fullSpeech += `Paylaşılan videonun betimlemesi: ${post.aiDescription || 'Videoda klavyede hızlıca kod yazan eller yakın plandan gösteriliyor.'}`;
+        fullSpeech += `Paylaşılan videonun betimlemesi: ${post.aiDescription || 'Videoda klavyede kod yazan eller yakın plandan gösteriliyor.'}`;
       }
 
       SpeechService.speak(
@@ -77,7 +77,7 @@ export const FeedCard = ({ post }) => {
         styles.card,
         {
           backgroundColor: colors.cardBackground,
-          borderColor: isVisual ? '#FFE600' : isHearing ? '#0284C7' : isMotor ? '#7C3AED' : colors.cardBorder,
+          borderColor: isVisual ? '#FFE600' : isHearing ? '#38BDF8' : isMotor ? '#7C3AED' : colors.cardBorder,
           borderWidth: isVisual ? 2.5 : isHearing || isMotor ? 2 : 1,
         },
       ]}
@@ -104,7 +104,7 @@ export const FeedCard = ({ post }) => {
             <Volume2 size={20} color="#000000" />
           )}
           <Text style={[styles.voiceBannerText, { color: isReadingPost ? '#FFFFFF' : '#000000' }]}>
-            {isReadingPost ? 'Okuma Sürüyor (Durdurmak İçin Dokunun) ⏹️' : '🔊 Gönderiyi ve Görseli Dinlemek İçin Dokunun'}
+            {isReadingPost ? 'Okuma Sürüyor (Durdurmak İçin Dokunun) ⏹️' : '🔊 Dinlemek İçin Karta Dokunun'}
           </Text>
         </TouchableOpacity>
       )}
@@ -130,9 +130,12 @@ export const FeedCard = ({ post }) => {
             ]}
           />
           <View style={styles.authorInfo}>
-            <Text style={[styles.authorName, { color: colors.text, fontSize: 16 * fontSizeScale }]}>
-              {post.author.name}
-            </Text>
+            <View style={styles.nameRow}>
+              <Text style={[styles.authorName, { color: colors.text, fontSize: 16 * fontSizeScale }]}>
+                {post.author.name}
+              </Text>
+              <CheckCircle2 size={15} color={isVisual ? '#FFE600' : '#2563EB'} style={{ marginLeft: 4 }} />
+            </View>
             <Text style={[styles.authorHandle, { color: colors.textMuted, fontSize: 12 * fontSizeScale }]}>
               {post.author.handle} • {post.timestamp}
             </Text>
@@ -228,14 +231,14 @@ export const FeedCard = ({ post }) => {
             {isHearing && (
               <View style={styles.tidOverlay}>
                 <View style={styles.tidHeader}>
-                  <UserCheck size={12} color="#FFFFFF" />
                   <Text style={styles.tidLabel}>🤟 TİD Çevirmeni</Text>
+                  <View style={styles.tidLiveDot} />
                 </View>
                 <Image
                   source={{ uri: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80' }}
                   style={styles.tidAvatar}
                 />
-                <Text style={styles.tidActiveText}>Canlı Aktarım</Text>
+                <Text style={styles.tidActiveText}>Canlı Tercüme</Text>
               </View>
             )}
 
@@ -268,7 +271,7 @@ export const FeedCard = ({ post }) => {
         )}
       </TouchableOpacity>
 
-      {/* Alt Etkileşim Butonları (Motor Engelliler İçin Devasa Dokunma Alanları) */}
+      {/* Alt Etkileşim Butonları */}
       <View
         style={[
           styles.actionsRow,
@@ -336,8 +339,13 @@ const styles = StyleSheet.create({
   card: {
     marginHorizontal: 16,
     marginVertical: 10,
-    borderRadius: 18,
+    borderRadius: 20,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 2,
   },
   voiceBanner: {
     flexDirection: 'row',
@@ -363,6 +371,10 @@ const styles = StyleSheet.create({
   },
   authorInfo: {
     flex: 1,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   authorName: {
     fontWeight: '800',
@@ -438,11 +450,15 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
     backgroundColor: 'rgba(2, 132, 199, 0.95)',
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 6,
     alignItems: 'center',
     borderWidth: 1.5,
     borderColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
   },
   tidHeader: {
     flexDirection: 'row',
@@ -454,6 +470,12 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 9,
     fontWeight: '800',
+  },
+  tidLiveDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#22C55E',
   },
   tidAvatar: {
     width: 44,
