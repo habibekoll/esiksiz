@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { useAccessibility, MODES } from '../context/AccessibilityContext';
 import { SpeechService } from '../services/speechService';
-import { Volume2, VolumeX, Heart, MessageCircle, Share2, Sparkles, Subtitles, Play, Pause } from 'lucide-react-native';
+import { Volume2, VolumeX, Heart, MessageCircle, Share2, Sparkles, Subtitles, Play, Pause, Activity } from 'lucide-react-native';
 
 export const FeedCard = ({ post }) => {
-  const { theme, currentMode, fontSizeScale } = useAccessibility();
+  const { theme, currentMode, fontSizeScale, bionicReadingEnabled, setIsSpeaking, setSpeakingText } = useAccessibility();
   const colors = theme.colors;
 
   const [isReadingCaption, setIsReadingCaption] = useState(false);
@@ -20,7 +20,7 @@ export const FeedCard = ({ post }) => {
     if (isPlayingVideo && post.captions && post.captions.length > 0) {
       timer = setInterval(() => {
         setCurrentCaptionIndex((prev) => (prev + 1) % post.captions.length);
-      }, 3500);
+      }, 3200);
     }
     return () => clearInterval(timer);
   }, [isPlayingVideo, post.captions]);
@@ -30,13 +30,30 @@ export const FeedCard = ({ post }) => {
     if (isReadingCaption) {
       SpeechService.stop();
       setIsReadingCaption(false);
+      setIsSpeaking(false);
+      setSpeakingText('');
     } else {
       setIsReadingCaption(true);
+      setIsSpeaking(true);
       const textToRead = `Görselin Yapay Zekâ Betimlemesi: ${post.aiDescription}`;
+      setSpeakingText(textToRead);
+
       SpeechService.speak(
         textToRead,
-        () => setIsReadingCaption(false),
-        () => setIsReadingCaption(false)
+        () => {
+          setIsReadingCaption(true);
+          setIsSpeaking(true);
+        },
+        () => {
+          setIsReadingCaption(false);
+          setIsSpeaking(false);
+          setSpeakingText('');
+        },
+        () => {
+          setIsReadingCaption(false);
+          setIsSpeaking(false);
+          setSpeakingText('');
+        }
       );
     }
   };
@@ -51,6 +68,23 @@ export const FeedCard = ({ post }) => {
     }
   };
 
+  // Bionic Reading Render Fonksiyonu (DEHB Odaklanma Desteği)
+  const renderBionicText = (text) => {
+    if (!bionicReadingEnabled) return text;
+    const words = text.split(' ');
+    return words.map((word, idx) => {
+      const mid = Math.ceil(word.length / 2);
+      const boldPart = word.slice(0, mid);
+      const restPart = word.slice(mid);
+      return (
+        <Text key={idx}>
+          <Text style={{ fontWeight: '800' }}>{boldPart}</Text>
+          <Text>{restPart} </Text>
+        </Text>
+      );
+    });
+  };
+
   const isHighContrast = theme.isHighContrast;
   const isHearing = currentMode === MODES.HEARING;
 
@@ -60,8 +94,8 @@ export const FeedCard = ({ post }) => {
         styles.card,
         {
           backgroundColor: colors.cardBackground,
-          borderColor: colors.cardBorder,
-          borderWidth: isHighContrast ? 2 : 1,
+          borderColor: isHearing && isPlayingVideo ? '#38BDF8' : colors.cardBorder,
+          borderWidth: isHighContrast ? 2 : isHearing && isPlayingVideo ? 2.5 : 1,
         },
       ]}
       accessible={true}
@@ -106,9 +140,16 @@ export const FeedCard = ({ post }) => {
             {post.author.handle} • {post.timestamp}
           </Text>
         </View>
+
+        {/* İşitme Engelli Rozeti */}
+        {isHearing && (
+          <View style={styles.hearingBadge}>
+            <Text style={styles.hearingBadgeText}>🧏 Görsel Destek Aktif</Text>
+          </View>
+        )}
       </View>
 
-      {/* Gönderi Metni */}
+      {/* Gönderi Metni (Bionic Reading desteği ile) */}
       <Text
         style={[
           styles.postText,
@@ -119,10 +160,10 @@ export const FeedCard = ({ post }) => {
           },
         ]}
       >
-        {post.content}
+        {renderBionicText(post.content)}
       </Text>
 
-      {/* 1. Görsel ve Yapay Zekâ Sesli Açıklama Bileşeni (İP3 Çekirdek Özelliği) */}
+      {/* 1. Görsel ve Yapay Zekâ Sesli Açıklama Bileşeni */}
       {post.image && (
         <View style={styles.mediaContainer}>
           <Image
@@ -157,7 +198,7 @@ export const FeedCard = ({ post }) => {
                 </Text>
               </View>
 
-              {/* Sesli Dinle Butonu (Canlı TTS) */}
+              {/* Canlı Sesli Dinle Butonu (TTS) */}
               <TouchableOpacity
                 onPress={handleToggleSpeakCaption}
                 style={[
@@ -194,6 +235,14 @@ export const FeedCard = ({ post }) => {
               </TouchableOpacity>
             </View>
 
+            {/* Ses Dalga Göstergesi */}
+            {isReadingCaption && (
+              <View style={styles.waveRow}>
+                <Activity size={16} color="#DC2626" />
+                <Text style={styles.waveText}>SESLENDİRİLİYOR (Web Speech TTS)...</Text>
+              </View>
+            )}
+
             <Text
               style={[
                 styles.aiDescriptionText,
@@ -203,7 +252,7 @@ export const FeedCard = ({ post }) => {
                 },
               ]}
             >
-              {post.aiDescription}
+              {renderBionicText(post.aiDescription)}
             </Text>
           </View>
         </View>
@@ -232,7 +281,7 @@ export const FeedCard = ({ post }) => {
             </TouchableOpacity>
           </View>
 
-          {/* Canlı Altyazı Kutusu (WCAG 1.2.2 & 1.4.3 AA/AAA) */}
+          {/* Canlı Altyazı Kutusu */}
           <View
             style={[
               styles.captionOverlay,
@@ -249,7 +298,7 @@ export const FeedCard = ({ post }) => {
             <View style={styles.captionBadgeRow}>
               <Subtitles size={14} color="#FFE600" />
               <Text style={styles.captionBadgeText}>Otomatik Türkçe ASR Altyazı</Text>
-              {isPlayingVideo && <Text style={styles.liveDot}>● CANLI ALTYAZI</Text>}
+              {isPlayingVideo && <Text style={styles.liveDot}>● CANLI YAYIN</Text>}
             </View>
             <Text style={styles.captionText}>
               {post.captions[currentCaptionIndex].text}
@@ -258,7 +307,7 @@ export const FeedCard = ({ post }) => {
         </View>
       )}
 
-      {/* Etkileşim Butonları (WCAG 2.5.8: Min 44x44 dokunma alanı) */}
+      {/* Etkileşim Butonları */}
       <View
         style={[
           styles.actionRow,
@@ -356,6 +405,17 @@ const styles = StyleSheet.create({
   authorHandle: {
     marginTop: 2,
   },
+  hearingBadge: {
+    backgroundColor: '#E0F2FE',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  hearingBadgeText: {
+    color: '#0284C7',
+    fontSize: 10,
+    fontWeight: '800',
+  },
   postText: {
     paddingHorizontal: 14,
     paddingBottom: 12,
@@ -400,6 +460,19 @@ const styles = StyleSheet.create({
   speakButtonText: {
     fontSize: 12,
     fontWeight: '700',
+  },
+  waveRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 6,
+    paddingVertical: 2,
+  },
+  waveText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#DC2626',
+    letterSpacing: 0.5,
   },
   aiDescriptionText: {
     lineHeight: 18,
@@ -458,7 +531,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     minWidth: 44,
-    minHeight: 44, // WCAG 2.2 AA dokunma kriteri
+    minHeight: 44,
   },
   actionCount: {
     fontWeight: '600',

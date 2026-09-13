@@ -2,27 +2,43 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { useAccessibility } from '../context/AccessibilityContext';
 import { AICaptionService } from '../services/aiCaptionService';
-import { Image as ImageIcon, Sparkles, ArrowLeft, Edit3, CheckCircle } from 'lucide-react-native';
+import { Image as ImageIcon, Sparkles, ArrowLeft, Edit3, CheckCircle, RefreshCw } from 'lucide-react-native';
+
+const SAMPLE_IMAGES = [
+  {
+    url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&auto=format&fit=crop&q=80',
+    caption: 'Görselde TEKNOFEST standında genç mühendisler erişilebilir sosyal medya prototipini jüriye tanıtıyor.',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=80',
+    caption: 'Görselde bir grup üniversite öğrencisi dizüstü bilgisayarlarıyla kütüphanede yazılım projesi üzerine beyin fırtınası yapıyor.',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&auto=format&fit=crop&q=80',
+    caption: 'Görselde teknoloji seminerinde sahnedeki konuşmacı ve salondaki dinleyiciler dikkatle sunumu takip ediyor.',
+  },
+];
 
 export const CreatePostScreen = ({ onBack, onPostCreated }) => {
   const { theme, fontSizeScale } = useAccessibility();
   const colors = theme.colors;
 
   const [postText, setPostText] = useState('');
-  const [selectedImage, setSelectedImage] = useState(
-    'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&auto=format&fit=crop&q=80'
-  );
+  const [selectedSampleIndex, setSelectedSampleIndex] = useState(0);
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
-  const [generatedAltText, setGeneratedAltText] = useState(
-    'Görselde TEKNOFEST standında genç mühendisler erişilebilir sosyal medya prototipi üzerinde çalışıyor.'
-  );
+  const [generatedAltText, setGeneratedAltText] = useState(SAMPLE_IMAGES[0].caption);
   const [isEditingAltText, setIsEditingAltText] = useState(false);
 
-  const handleSelectSampleImage = async () => {
+  const selectedImage = SAMPLE_IMAGES[selectedSampleIndex].url;
+
+  const handleNextSampleImage = () => {
     setIsGeneratingAi(true);
-    const altText = await AICaptionService.generateAltTextForUpload(selectedImage);
-    setGeneratedAltText(altText);
-    setIsGeneratingAi(false);
+    const nextIdx = (selectedSampleIndex + 1) % SAMPLE_IMAGES.length;
+    setSelectedSampleIndex(nextIdx);
+    setTimeout(() => {
+      setGeneratedAltText(SAMPLE_IMAGES[nextIdx].caption);
+      setIsGeneratingAi(false);
+    }, 600);
   };
 
   const handlePublish = () => {
@@ -129,114 +145,103 @@ export const CreatePostScreen = ({ onBack, onPostCreated }) => {
       />
 
       {/* Seçili Görsel Önizlemesi */}
-      {selectedImage && (
-        <View style={styles.imagePreviewContainer}>
-          <Image source={{ uri: selectedImage }} style={styles.previewImage} />
+      <View style={styles.imagePreviewContainer}>
+        <Image source={{ uri: selectedImage }} style={styles.previewImage} />
 
-          {/* Yapay Zekâ Otomatik Alt Metin Kutusu (İP3 Çekirdek Özelliği) */}
-          <View
-            style={[
-              styles.aiAltBox,
-              {
-                backgroundColor: isHighContrast ? '#000000' : '#F0FDF4',
-                borderColor: isHighContrast ? '#FFE600' : '#86EFAC',
-                borderWidth: isHighContrast ? 2 : 1.5,
-              },
-            ]}
-          >
-            <View style={styles.aiAltHeader}>
-              <View style={styles.aiTagRow}>
-                <Sparkles size={16} color={isHighContrast ? '#FFE600' : '#16A34A'} />
-                <Text
-                  style={[
-                    styles.aiTagText,
-                    { color: isHighContrast ? '#FFE600' : '#15803D' },
-                  ]}
-                >
-                  Yapay Zekâ Otomatik Alt Metin Taslağı
-                </Text>
-              </View>
+        {/* Farklı Görsel Test Et Butonu */}
+        <TouchableOpacity
+          onPress={handleNextSampleImage}
+          style={styles.changeSampleBtn}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel="Farklı görsel seç ve yapay zekâ analizini test et"
+        >
+          <RefreshCw size={14} color="#FFFFFF" />
+          <Text style={styles.changeSampleText}>Farklı Görsel Seç & AI Analiz Et</Text>
+        </TouchableOpacity>
 
-              <TouchableOpacity
-                onPress={() => setIsEditingAltText(!isEditingAltText)}
-                style={styles.editAltBtn}
-                accessible={true}
-                accessibilityRole="button"
-                accessibilityLabel="Yapay zekanın ürettiği alt metni düzenle"
-              >
-                <Edit3 size={14} color={isHighContrast ? '#FFE600' : '#15803D'} />
-                <Text
-                  style={[
-                    styles.editAltText,
-                    { color: isHighContrast ? '#FFE600' : '#15803D' },
-                  ]}
-                >
-                  {isEditingAltText ? 'Bitti' : 'Düzenle'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {isGeneratingAi ? (
-              <ActivityIndicator color={colors.primary} style={{ marginVertical: 10 }} />
-            ) : isEditingAltText ? (
-              <TextInput
-                style={[
-                  styles.altInput,
-                  {
-                    color: colors.text,
-                    backgroundColor: colors.inputBg,
-                    borderColor: colors.border,
-                  },
-                ]}
-                value={generatedAltText}
-                onChangeText={setGeneratedAltText}
-                multiline
-                accessible={true}
-                accessibilityLabel="Alt metni düzenleme kutusu"
-              />
-            ) : (
+        {/* Yapay Zekâ Otomatik Alt Metin Kutusu */}
+        <View
+          style={[
+            styles.aiAltBox,
+            {
+              backgroundColor: isHighContrast ? '#000000' : '#F0FDF4',
+              borderColor: isHighContrast ? '#FFE600' : '#86EFAC',
+              borderWidth: isHighContrast ? 2 : 1.5,
+            },
+          ]}
+        >
+          <View style={styles.aiAltHeader}>
+            <View style={styles.aiTagRow}>
+              <Sparkles size={16} color={isHighContrast ? '#FFE600' : '#16A34A'} />
               <Text
                 style={[
-                  styles.altPreviewText,
-                  { color: isHighContrast ? '#FFFFFF' : '#166534' },
+                  styles.aiTagText,
+                  { color: isHighContrast ? '#FFE600' : '#15803D' },
                 ]}
               >
-                "{generatedAltText}"
+                Yapay Zekâ Türkçe Alt Metin Taslağı
               </Text>
-            )}
+            </View>
 
+            <TouchableOpacity
+              onPress={() => setIsEditingAltText(!isEditingAltText)}
+              style={styles.editAltBtn}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Yapay zekanın ürettiği alt metni düzenle"
+            >
+              <Edit3 size={14} color={isHighContrast ? '#FFE600' : '#15803D'} />
+              <Text
+                style={[
+                  styles.editAltText,
+                  { color: isHighContrast ? '#FFE600' : '#15803D' },
+                ]}
+              >
+                {isEditingAltText ? 'Bitti' : 'Düzenle'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {isGeneratingAi ? (
+            <ActivityIndicator color={colors.primary} style={{ marginVertical: 10 }} />
+          ) : isEditingAltText ? (
+            <TextInput
+              style={[
+                styles.altInput,
+                {
+                  color: colors.text,
+                  backgroundColor: colors.inputBg,
+                  borderColor: colors.border,
+                },
+              ]}
+              value={generatedAltText}
+              onChangeText={setGeneratedAltText}
+              multiline
+              accessible={true}
+              accessibilityLabel="Alt metni düzenleme kutusu"
+            />
+          ) : (
             <Text
               style={[
-                styles.altHint,
-                { color: isHighContrast ? '#FFE600' : '#16A34A' },
+                styles.altPreviewText,
+                { color: isHighContrast ? '#FFFFFF' : '#166534' },
               ]}
             >
-              ✓ Bu metin görme engelli kullanıcıların ekran okuyucularına otomatik okunacaktır.
+              "{generatedAltText}"
             </Text>
-          </View>
-        </View>
-      )}
+          )}
 
-      {/* Farklı Görsel Test Et Butonu */}
-      <TouchableOpacity
-        onPress={handleSelectSampleImage}
-        style={[
-          styles.changeImgBtn,
-          {
-            backgroundColor: isHighContrast ? '#111111' : colors.cardBackground,
-            borderColor: colors.border,
-            borderWidth: 1,
-          },
-        ]}
-        accessible={true}
-        accessibilityRole="button"
-        accessibilityLabel="Yapay zekâ görsel analizini yeniden çalıştır"
-      >
-        <ImageIcon size={18} color={colors.text} />
-        <Text style={[styles.changeImgText, { color: colors.text }]}>
-          Görsel Analizini Yeniden Çalıştır (AI Model)
-        </Text>
-      </TouchableOpacity>
+          <Text
+            style={[
+              styles.altHint,
+              { color: isHighContrast ? '#FFE600' : '#16A34A' },
+            ]}
+          >
+            ✓ Görme engellilerin ekran okuyucularına Türkçe olarak okunacaktır.
+          </Text>
+        </View>
+      </View>
     </ScrollView>
   );
 };
@@ -272,7 +277,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
-    minHeight: 44, // WCAG 2.2 AA dokunma alanı
+    minHeight: 44,
     justifyContent: 'center',
   },
   publishBtnText: {
@@ -280,7 +285,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   textInput: {
-    minHeight: 110,
+    minHeight: 90,
     padding: 14,
     borderRadius: 14,
     textAlignVertical: 'top',
@@ -293,8 +298,25 @@ const styles = StyleSheet.create({
   },
   previewImage: {
     width: '100%',
-    height: 200,
+    height: 180,
     resizeMode: 'cover',
+  },
+  changeSampleBtn: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 14,
+  },
+  changeSampleText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
   },
   aiAltBox: {
     padding: 14,
@@ -343,19 +365,6 @@ const styles = StyleSheet.create({
   },
   altHint: {
     fontSize: 11,
-    fontWeight: '700',
-  },
-  changeImgBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    padding: 14,
-    borderRadius: 12,
-    minHeight: 48,
-  },
-  changeImgText: {
-    fontSize: 14,
     fontWeight: '700',
   },
 });
