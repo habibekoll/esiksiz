@@ -1,20 +1,13 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { useAccessibility, MODES } from '../context/AccessibilityContext';
-import { Eye, Volume2, Sparkles, LayoutGrid, ArrowRight, ShieldCheck } from 'lucide-react-native';
+import { Eye, Volume2, Sparkles, LayoutGrid, ArrowRight } from 'lucide-react-native';
 
 export const OnboardingScreen = ({ onComplete }) => {
-  const { setMode, setAdaptiveEngineActive } = useAccessibility();
+  const { selectMode } = useAccessibility();
 
-  const handleSelectMode = (modeId) => {
-    setMode(modeId);
-    setAdaptiveEngineActive(true);
-    onComplete();
-  };
-
-  const handleSmartAdaptive = () => {
-    setMode(MODES.STANDARD);
-    setAdaptiveEngineActive(true);
+  const handleChooseMode = (modeId) => {
+    selectMode(modeId);
     onComplete();
   };
 
@@ -22,100 +15,108 @@ export const OnboardingScreen = ({ onComplete }) => {
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
       accessible={true}
       accessibilityRole="region"
-      accessibilityLabel="Eşiksiz Karşılama ve İhtiyaç Belirleme Ekranı"
+      accessibilityLabel="Eşiksiz Deneyim ve Mod Belirleme Ekranı"
     >
-      <View style={styles.header}>
-        <View style={styles.badge}>
-          <ShieldCheck size={16} color="#2563EB" />
-          <Text style={styles.badgeText}>TEKNOFEST 2026 SOSYAL İNOVASYON</Text>
-        </View>
-        <Text style={styles.title}>
-          Hoş Geldiniz, <Text style={styles.titleAccent}>Eşiksiz</Text> NSosyal
+      <View style={styles.headerArea}>
+        <Text style={styles.appBrand}>
+          N<Text style={{ color: '#2563EB' }}>Sosyal</Text>
         </Text>
-        <Text style={styles.subtitle}>
-          Sosyal medyayı engelsiz ve eşit koşullarda kullanmanız için size en uygun deneyim modunu seçin veya akıllı motorumuza bırakın.
+        <Text style={styles.mainTitle}>Size En Uygun Deneyimi Seçin</Text>
+        <Text style={styles.subTitle}>
+          Uygulama seçtiğiniz ihtiyaca göre anında şekillenecek ve tüm deneyim bu modda devam edecektir.
         </Text>
       </View>
 
-      {/* Akıllı Öneri ile Devam Et Butonu */}
-      <TouchableOpacity
-        onPress={handleSmartAdaptive}
-        style={styles.smartButton}
-        accessible={true}
-        accessibilityRole="button"
-        accessibilityLabel="Akıllı öneri ile başla. Davranışlarınıza göre en uygun modu Eşiksiz proaktif olarak önerir."
-      >
-        <View style={styles.smartIconBox}>
-          <Sparkles size={24} color="#FFFFFF" />
-        </View>
-        <View style={styles.smartTextContainer}>
-          <Text style={styles.smartTitle}>🤖 Akıllı Öneri ile Başla (Tavsiye Edilen)</Text>
-          <Text style={styles.smartDesc}>
-            Uygulamayı kullanırken davranışlarınızı anonim analiz eder, ihtiyacınız olduğunda doğru modu teklif eder.
-          </Text>
-        </View>
-        <ArrowRight size={20} color="#FFFFFF" />
-      </TouchableOpacity>
-
-      <Text style={styles.dividerText}>VEYA DOĞRUDAN BİR MOD SEÇİN</Text>
-
-      {/* Mod Seçenekleri Kartları */}
-      <View style={styles.cardsGrid}>
+      {/* 4 Ana Seçenek Kartı */}
+      <View style={styles.optionsList}>
+        {/* 1. GÖRME ENGELLİ / AZ GÖREN */}
         <TouchableOpacity
-          onPress={() => handleSelectMode(MODES.VISUAL)}
-          style={[styles.card, { borderColor: '#FFE600', backgroundColor: '#000000' }]}
+          onPress={() => handleChooseMode(MODES.VISUAL)}
+          style={[styles.card, styles.cardVisual]}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="Görme Engelli ve Az Gören Modu. Saf siyah zemin, 16'ya 1 sarı kontrast, sesli görsel betimleme."
+          accessibilityLabel="Görme Desteği Modu. 16'ya 1 Yüksek kontrast sarı ve siyah, büyük butonlar ve sesli görsel açıklaması."
         >
-          <Eye size={28} color="#FFE600" />
-          <Text style={[styles.cardTitle, { color: '#FFE600' }]}>Görme Engelli / Az Gören</Text>
-          <Text style={[styles.cardDesc, { color: '#FFFFFF' }]}>
-            Yüksek kontrast (Saf Siyah / Sarı), büyük dokunma hedefleri ve yapay zekâ sesli görsel betimlemesi.
+          <View style={styles.cardHeader}>
+            <View style={[styles.iconPill, { backgroundColor: '#FFE600' }]}>
+              <Eye size={24} color="#000000" />
+            </View>
+            <ArrowRight size={20} color="#FFE600" />
+          </View>
+          <Text style={[styles.cardTitle, { color: '#FFE600' }]}>
+            Görme Desteği & Yüksek Kontrast
+          </Text>
+          <Text style={[styles.cardDescription, { color: '#FFFFFF' }]}>
+            Saf siyah arkaplan, canlı sarı vurgular (16:1), büyük dokunmatik hedefler ve yapay zekâ sesli görsel açıklaması.
           </Text>
         </TouchableOpacity>
 
+        {/* 2. İŞİTME ENGELLİ */}
         <TouchableOpacity
-          onPress={() => handleSelectMode(MODES.HEARING)}
-          style={[styles.card, { borderColor: '#38BDF8', backgroundColor: '#F0F9FF' }]}
+          onPress={() => handleChooseMode(MODES.HEARING)}
+          style={[styles.card, styles.cardHearing]}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="İşitme Engelli Modu. Otomatik Türkçe altyazı ve görsel uyarılar."
+          accessibilityLabel="İşitme Desteği Modu. Sürekli açık Türkçe altyazı ve görsel uyarılar."
         >
-          <Volume2 size={28} color="#0284C7" />
-          <Text style={[styles.cardTitle, { color: '#0369A1' }]}>İşitme Engelli</Text>
-          <Text style={[styles.cardDesc, { color: '#334155' }]}>
-            Videolara Türkçe otomatik altyazı, sesli bildirimler yerine titreşimli ve renkli görsel uyarılar.
+          <View style={styles.cardHeader}>
+            <View style={[styles.iconPill, { backgroundColor: '#0284C7' }]}>
+              <Volume2 size={24} color="#FFFFFF" />
+            </View>
+            <ArrowRight size={20} color="#0284C7" />
+          </View>
+          <Text style={[styles.cardTitle, { color: '#0369A1' }]}>
+            İşitme Desteği & Altyazı
+          </Text>
+          <Text style={[styles.cardDescription, { color: '#334155' }]}>
+            Tüm video ve seslerde senkronize Türkçe altyazı şeridi ve sesli olaylar için görsel uyarılar.
           </Text>
         </TouchableOpacity>
 
+        {/* 3. NÖROGELİŞİMSEL SAKİN MOD (DEHB / OTİZM) */}
         <TouchableOpacity
-          onPress={() => handleSelectMode(MODES.NEURO)}
-          style={[styles.card, { borderColor: '#0D9488', backgroundColor: '#F0FDFA' }]}
+          onPress={() => handleChooseMode(MODES.NEURO)}
+          style={[styles.card, styles.cardNeuro]}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="Nörogelişimsel Sakin Mod. DEHB ve Otizm için sıfır animasyon, pastel tonlar ve sakin akış."
+          accessibilityLabel="Nörogelişimsel Sakin Mod. DEHB ve Otizm için Bionic Reading, sıfır animasyon ve sade akış."
         >
-          <Sparkles size={28} color="#0D9488" />
-          <Text style={[styles.cardTitle, { color: '#0F766E' }]}>Nörogelişimsel Sakin (DEHB/Otizm)</Text>
-          <Text style={[styles.cardDesc, { color: '#334155' }]}>
-            Duyusal yükü azaltan pastel palet, döngüsel animasyonların durdurulması ve basitleştirilmiş arayüz.
+          <View style={styles.cardHeader}>
+            <View style={[styles.iconPill, { backgroundColor: '#0D9488' }]}>
+              <Sparkles size={24} color="#FFFFFF" />
+            </View>
+            <ArrowRight size={20} color="#0D9488" />
+          </View>
+          <Text style={[styles.cardTitle, { color: '#0F766E' }]}>
+            Nörogelişimsel Sakin Mod (DEHB / Otizm)
+          </Text>
+          <Text style={[styles.cardDescription, { color: '#334155' }]}>
+            Bionic Reading ile hızlı odaklanma, hareketli animasyonların dondurulması ve duyusal yükü azaltılmış arayüz.
           </Text>
         </TouchableOpacity>
 
+        {/* 4. STANDART NSOSYAL MODU */}
         <TouchableOpacity
-          onPress={() => handleSelectMode(MODES.STANDARD)}
-          style={[styles.card, { borderColor: '#CBD5E1', backgroundColor: '#FFFFFF' }]}
+          onPress={() => handleChooseMode(MODES.STANDARD)}
+          style={[styles.card, styles.cardStandard]}
           accessible={true}
           accessibilityRole="button"
           accessibilityLabel="Standart NSosyal Modu. Varsayılan modern sosyal medya arayüzü."
         >
-          <LayoutGrid size={28} color="#2563EB" />
-          <Text style={[styles.cardTitle, { color: '#0F172A' }]}>Standart Deneyim</Text>
-          <Text style={[styles.cardDesc, { color: '#475569' }]}>
-            Varsayılan modern NSosyal arayüzü. İstediğiniz zaman sağ üst köşeden erişilebilirlik moduna geçebilirsiniz.
+          <View style={styles.cardHeader}>
+            <View style={[styles.iconPill, { backgroundColor: '#2563EB' }]}>
+              <LayoutGrid size={24} color="#FFFFFF" />
+            </View>
+            <ArrowRight size={20} color="#2563EB" />
+          </View>
+          <Text style={[styles.cardTitle, { color: '#0F172A' }]}>
+            Standart Görünüm
+          </Text>
+          <Text style={[styles.cardDescription, { color: '#64748B' }]}>
+            Varsayılan modern NSosyal arayüzü. Dilediğiniz zaman ayarlardan erişilebilirlik moduna geçebilirsiniz.
           </Text>
         </TouchableOpacity>
       </View>
@@ -132,92 +133,73 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 40,
   },
-  header: {
-    marginTop: 20,
+  headerArea: {
+    marginTop: 16,
     marginBottom: 24,
   },
-  badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: '#EFF6FF',
-    alignSelf: 'flex-start',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-    marginBottom: 12,
-  },
-  badgeText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#2563EB',
-  },
-  title: {
-    fontSize: 28,
+  appBrand: {
+    fontSize: 26,
     fontWeight: '900',
     color: '#0F172A',
-    lineHeight: 34,
+    marginBottom: 10,
+    letterSpacing: -0.5,
   },
-  titleAccent: {
-    color: '#2563EB',
-  },
-  subtitle: {
-    fontSize: 15,
-    color: '#475569',
-    marginTop: 8,
-    lineHeight: 22,
-  },
-  smartButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#2563EB',
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 20,
-    elevation: 3,
-    minHeight: 56, // WCAG 2.2 AA Dokunma Alanı
-  },
-  smartIconBox: {
-    marginRight: 14,
-  },
-  smartTextContainer: {
-    flex: 1,
-  },
-  smartTitle: {
-    color: '#FFFFFF',
-    fontSize: 15,
+  mainTitle: {
+    fontSize: 22,
     fontWeight: '800',
-    marginBottom: 4,
+    color: '#0F172A',
+    lineHeight: 28,
   },
-  smartDesc: {
-    color: '#DBEAFE',
-    fontSize: 12,
-    lineHeight: 16,
+  subTitle: {
+    fontSize: 14,
+    color: '#64748B',
+    marginTop: 6,
+    lineHeight: 20,
   },
-  dividerText: {
-    textAlign: 'center',
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#94A3B8',
-    letterSpacing: 0.5,
-    marginVertical: 14,
-  },
-  cardsGrid: {
-    gap: 12,
+  optionsList: {
+    gap: 14,
   },
   card: {
-    padding: 16,
-    borderRadius: 14,
+    padding: 18,
+    borderRadius: 18,
     borderWidth: 2,
-    minHeight: 60,
+    minHeight: 110,
+  },
+  cardVisual: {
+    backgroundColor: '#000000',
+    borderColor: '#FFE600',
+  },
+  cardHearing: {
+    backgroundColor: '#F0F9FF',
+    borderColor: '#38BDF8',
+  },
+  cardNeuro: {
+    backgroundColor: '#F0FDFA',
+    borderColor: '#14B8A6',
+  },
+  cardStandard: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#E2E8F0',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  iconPill: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '800',
-    marginTop: 8,
-    marginBottom: 4,
+    marginBottom: 6,
   },
-  cardDesc: {
+  cardDescription: {
     fontSize: 13,
     lineHeight: 18,
   },

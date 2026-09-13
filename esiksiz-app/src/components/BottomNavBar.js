@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useAccessibility, MODES } from '../context/AccessibilityContext';
+import { useAccessibility } from '../context/AccessibilityContext';
 import { Home, Compass, PlusSquare, Bell, Sliders } from 'lucide-react-native';
 
 export const BottomNavBar = ({ activeTab, onTabChange }) => {
   const { theme, fontSizeScale } = useAccessibility();
   const colors = theme.colors;
-  const isHighContrast = theme.isHighContrast;
+  const isVisual = theme.isVisual;
 
   const tabs = [
     { id: 'feed', label: 'Ana Akış', icon: Home },
@@ -21,44 +21,41 @@ export const BottomNavBar = ({ activeTab, onTabChange }) => {
       style={[
         styles.navContainer,
         {
-          backgroundColor: colors.cardBackground,
+          backgroundColor: colors.navBg,
           borderTopColor: colors.border,
-          borderTopWidth: isHighContrast ? 2 : 1,
+          borderTopWidth: isVisual ? 2.5 : 1,
         },
       ]}
       accessible={true}
       accessibilityRole="tablist"
-      accessibilityLabel="Alt Gezinme Çubuğu"
     >
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
         const IconComp = tab.icon;
-        const iconColor = isActive
-          ? isHighContrast
-            ? '#FFE600'
-            : colors.primary
-          : isHighContrast
-          ? '#888888'
-          : colors.textMuted;
+        const iconColor = isActive ? colors.activeNav : colors.inactiveNav;
 
         return (
           <TouchableOpacity
             key={tab.id}
             onPress={() => onTabChange(tab.id)}
-            style={styles.tabButton}
+            style={[styles.tabButton, { minHeight: isVisual ? 48 : 44 }]}
             accessible={true}
             accessibilityRole="tab"
             accessibilityState={{ selected: isActive }}
             accessibilityLabel={`${tab.label} sekmesi`}
           >
-            <IconComp size={22} color={iconColor} strokeWidth={isActive ? 2.5 : 1.8} />
+            <IconComp
+              size={isVisual ? 24 : 21}
+              color={iconColor}
+              strokeWidth={isActive ? 2.8 : 1.8}
+            />
             <Text
               style={[
                 styles.tabLabel,
                 {
                   color: iconColor,
-                  fontWeight: isActive ? '700' : '500',
-                  fontSize: 10 * fontSizeScale,
+                  fontWeight: isActive ? '800' : '600',
+                  fontSize: (isVisual ? 11 : 10) * fontSizeScale,
                 },
               ]}
             >
@@ -77,14 +74,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
     paddingVertical: 8,
-    paddingBottom: 12,
+    paddingBottom: 10,
     minHeight: 60,
   },
   tabButton: {
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: 54,
-    minHeight: 44, // WCAG 2.2 AA Dokunma Alanı
     gap: 3,
   },
   tabLabel: {

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { useAccessibility } from '../context/AccessibilityContext';
-import { AICaptionService } from '../services/aiCaptionService';
-import { Image as ImageIcon, Sparkles, ArrowLeft, Edit3, CheckCircle, RefreshCw } from 'lucide-react-native';
+import { Sparkles, ArrowLeft, Edit3, RefreshCw, Check } from 'lucide-react-native';
 
 const SAMPLE_IMAGES = [
   {
@@ -11,17 +10,14 @@ const SAMPLE_IMAGES = [
   },
   {
     url: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=80',
-    caption: 'Görselde bir grup üniversite öğrencisi dizüstü bilgisayarlarıyla kütüphanede yazılım projesi üzerine beyin fırtınası yapıyor.',
-  },
-  {
-    url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&auto=format&fit=crop&q=80',
-    caption: 'Görselde teknoloji seminerinde sahnedeki konuşmacı ve salondaki dinleyiciler dikkatle sunumu takip ediyor.',
+    caption: 'Görselde bir grup üniversite öğrencisi kütüphanede yazılım projesi üzerine beyin fırtınası yapıyor.',
   },
 ];
 
 export const CreatePostScreen = ({ onBack, onPostCreated }) => {
   const { theme, fontSizeScale } = useAccessibility();
   const colors = theme.colors;
+  const isVisual = theme.isVisual;
 
   const [postText, setPostText] = useState('');
   const [selectedSampleIndex, setSelectedSampleIndex] = useState(0);
@@ -38,7 +34,7 @@ export const CreatePostScreen = ({ onBack, onPostCreated }) => {
     setTimeout(() => {
       setGeneratedAltText(SAMPLE_IMAGES[nextIdx].caption);
       setIsGeneratingAi(false);
-    }, 600);
+    }, 500);
   };
 
   const handlePublish = () => {
@@ -62,15 +58,13 @@ export const CreatePostScreen = ({ onBack, onPostCreated }) => {
     onPostCreated(newPost);
   };
 
-  const isHighContrast = theme.isHighContrast;
-
   return (
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.content}
       accessible={true}
       accessibilityRole="region"
-      accessibilityLabel="Erişilebilir Gönderi Oluşturma Ekranı"
+      accessibilityLabel="Yeni Gönderi Paylaşma Ekranı"
     >
       {/* Üst Çubuk */}
       <View style={[styles.topBar, { borderBottomColor: colors.border }]}>
@@ -78,16 +72,16 @@ export const CreatePostScreen = ({ onBack, onPostCreated }) => {
           onPress={onBack}
           style={[
             styles.backBtn,
-            { backgroundColor: isHighContrast ? '#FFE600' : colors.inputBg },
+            { backgroundColor: isVisual ? '#FFE600' : colors.inputBg },
           ]}
           accessible={true}
           accessibilityRole="button"
           accessibilityLabel="Geri dön"
         >
-          <ArrowLeft size={20} color={isHighContrast ? '#000000' : colors.text} />
+          <ArrowLeft size={20} color={isVisual ? '#000000' : colors.text} />
         </TouchableOpacity>
         <Text style={[styles.topBarTitle, { color: colors.text }]}>
-          Yeni Gönderi Paylaş
+          Yeni Gönderi
         </Text>
         <TouchableOpacity
           onPress={handlePublish}
@@ -96,22 +90,23 @@ export const CreatePostScreen = ({ onBack, onPostCreated }) => {
             styles.publishBtn,
             {
               backgroundColor: postText.trim()
-                ? isHighContrast
+                ? isVisual
                   ? '#FFE600'
                   : colors.primary
                 : colors.border,
+              minHeight: isVisual ? 48 : 40,
             },
           ]}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="Gönderiyi paylaş"
+          accessibilityLabel="Gönderiyi Paylaş"
         >
           <Text
             style={[
               styles.publishBtnText,
               {
                 color: postText.trim()
-                  ? isHighContrast
+                  ? isVisual
                     ? '#000000'
                     : '#FFFFFF'
                   : colors.textMuted,
@@ -131,114 +126,74 @@ export const CreatePostScreen = ({ onBack, onPostCreated }) => {
             color: colors.text,
             backgroundColor: colors.cardBackground,
             borderColor: colors.cardBorder,
-            borderWidth: isHighContrast ? 2 : 1,
+            borderWidth: isVisual ? 2 : 1,
             fontSize: 16 * fontSizeScale,
           },
         ]}
-        placeholder="Aklınızdan ne geçiyor? NSosyal ile herkesle paylaşın..."
+        placeholder="Aklınızdan ne geçiyor? Herkesle paylaşın..."
         placeholderTextColor={colors.textMuted}
         multiline
         value={postText}
         onChangeText={setPostText}
-        accessible={true}
-        accessibilityLabel="Gönderi metni yazma alanı"
       />
 
-      {/* Seçili Görsel Önizlemesi */}
-      <View style={styles.imagePreviewContainer}>
-        <Image source={{ uri: selectedImage }} style={styles.previewImage} />
-
-        {/* Farklı Görsel Test Et Butonu */}
+      {/* Görsel Önizlemesi */}
+      <View style={styles.imageBox}>
+        <Image source={{ uri: selectedImage }} style={styles.previewImg} />
         <TouchableOpacity
           onPress={handleNextSampleImage}
-          style={styles.changeSampleBtn}
-          accessible={true}
-          accessibilityRole="button"
-          accessibilityLabel="Farklı görsel seç ve yapay zekâ analizini test et"
+          style={styles.changeBtn}
         >
           <RefreshCw size={14} color="#FFFFFF" />
-          <Text style={styles.changeSampleText}>Farklı Görsel Seç & AI Analiz Et</Text>
+          <Text style={styles.changeBtnText}>Görseli Değiştir</Text>
         </TouchableOpacity>
 
-        {/* Yapay Zekâ Otomatik Alt Metin Kutusu */}
+        {/* Yapay Zekâ Alt Metin Taslak Kutusu */}
         <View
           style={[
-            styles.aiAltBox,
+            styles.altBox,
             {
-              backgroundColor: isHighContrast ? '#000000' : '#F0FDF4',
-              borderColor: isHighContrast ? '#FFE600' : '#86EFAC',
-              borderWidth: isHighContrast ? 2 : 1.5,
+              backgroundColor: isVisual ? '#000000' : colors.inputBg,
+              borderColor: isVisual ? '#FFE600' : colors.border,
+              borderWidth: isVisual ? 2 : 1,
             },
           ]}
         >
-          <View style={styles.aiAltHeader}>
-            <View style={styles.aiTagRow}>
-              <Sparkles size={16} color={isHighContrast ? '#FFE600' : '#16A34A'} />
-              <Text
-                style={[
-                  styles.aiTagText,
-                  { color: isHighContrast ? '#FFE600' : '#15803D' },
-                ]}
-              >
-                Yapay Zekâ Türkçe Alt Metin Taslağı
+          <View style={styles.altHeader}>
+            <View style={styles.aiTag}>
+              <Sparkles size={14} color={isVisual ? '#FFE600' : colors.primary} />
+              <Text style={[styles.aiTagText, { color: isVisual ? '#FFE600' : colors.primary }]}>
+                Yapay Zekâ Alt Metin Taslağı
               </Text>
             </View>
-
             <TouchableOpacity
               onPress={() => setIsEditingAltText(!isEditingAltText)}
-              style={styles.editAltBtn}
-              accessible={true}
-              accessibilityRole="button"
-              accessibilityLabel="Yapay zekanın ürettiği alt metni düzenle"
+              style={styles.editBtn}
             >
-              <Edit3 size={14} color={isHighContrast ? '#FFE600' : '#15803D'} />
-              <Text
-                style={[
-                  styles.editAltText,
-                  { color: isHighContrast ? '#FFE600' : '#15803D' },
-                ]}
-              >
-                {isEditingAltText ? 'Bitti' : 'Düzenle'}
+              <Edit3 size={14} color={isVisual ? '#FFE600' : colors.primary} />
+              <Text style={[styles.editBtnText, { color: isVisual ? '#FFE600' : colors.primary }]}>
+                {isEditingAltText ? 'Tamam' : 'Düzenle'}
               </Text>
             </TouchableOpacity>
           </View>
 
           {isGeneratingAi ? (
-            <ActivityIndicator color={colors.primary} style={{ marginVertical: 10 }} />
+            <ActivityIndicator color={colors.primary} style={{ marginVertical: 8 }} />
           ) : isEditingAltText ? (
             <TextInput
-              style={[
-                styles.altInput,
-                {
-                  color: colors.text,
-                  backgroundColor: colors.inputBg,
-                  borderColor: colors.border,
-                },
-              ]}
+              style={[styles.altInput, { color: colors.text, borderColor: colors.border }]}
               value={generatedAltText}
               onChangeText={setGeneratedAltText}
               multiline
-              accessible={true}
-              accessibilityLabel="Alt metni düzenleme kutusu"
             />
           ) : (
-            <Text
-              style={[
-                styles.altPreviewText,
-                { color: isHighContrast ? '#FFFFFF' : '#166534' },
-              ]}
-            >
+            <Text style={[styles.altText, { color: colors.text, fontSize: 13 * fontSizeScale }]}>
               "{generatedAltText}"
             </Text>
           )}
 
-          <Text
-            style={[
-              styles.altHint,
-              { color: isHighContrast ? '#FFE600' : '#16A34A' },
-            ]}
-          >
-            ✓ Görme engellilerin ekran okuyucularına Türkçe olarak okunacaktır.
+          <Text style={[styles.altNote, { color: isVisual ? '#FFE600' : '#16A34A' }]}>
+            ✓ Görme engelli kullanıcıların ekran okuyucularına Türkçe olarak okunacaktır.
           </Text>
         </View>
       </View>
@@ -258,14 +213,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingBottom: 14,
+    paddingBottom: 12,
     borderBottomWidth: 1,
     marginBottom: 16,
   },
   backBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -275,9 +230,8 @@ const styles = StyleSheet.create({
   },
   publishBtn: {
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingVertical: 8,
     borderRadius: 20,
-    minHeight: 44,
     justifyContent: 'center',
   },
   publishBtnText: {
@@ -285,23 +239,22 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   textInput: {
-    minHeight: 90,
+    minHeight: 85,
     padding: 14,
     borderRadius: 14,
     textAlignVertical: 'top',
-    marginBottom: 16,
-  },
-  imagePreviewContainer: {
-    borderRadius: 14,
-    overflow: 'hidden',
     marginBottom: 14,
   },
-  previewImage: {
+  imageBox: {
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  previewImg: {
     width: '100%',
     height: 180,
     resizeMode: 'cover',
   },
-  changeSampleBtn: {
+  changeBtn: {
     position: 'absolute',
     top: 10,
     right: 10,
@@ -311,59 +264,56 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.7)',
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 14,
+    borderRadius: 12,
   },
-  changeSampleText: {
+  changeBtnText: {
     color: '#FFFFFF',
     fontSize: 11,
     fontWeight: '700',
   },
-  aiAltBox: {
-    padding: 14,
+  altBox: {
+    padding: 12,
     borderBottomLeftRadius: 14,
     borderBottomRightRadius: 14,
   },
-  aiAltHeader: {
+  altHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
   },
-  aiTagRow: {
+  aiTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 5,
   },
   aiTagText: {
     fontSize: 12,
     fontWeight: '800',
   },
-  editAltBtn: {
+  editBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    minHeight: 36,
-    paddingHorizontal: 8,
+    padding: 4,
   },
-  editAltText: {
+  editBtnText: {
     fontSize: 12,
     fontWeight: '700',
   },
-  altPreviewText: {
-    fontSize: 13,
+  altText: {
     lineHeight: 18,
-    fontWeight: '600',
     fontStyle: 'italic',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   altInput: {
     borderWidth: 1,
     borderRadius: 8,
-    padding: 10,
+    padding: 8,
     fontSize: 13,
-    marginBottom: 8,
+    marginBottom: 6,
   },
-  altHint: {
+  altNote: {
     fontSize: 11,
     fontWeight: '700',
   },

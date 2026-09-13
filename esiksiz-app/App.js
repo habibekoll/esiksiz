@@ -11,7 +11,6 @@ import { AdaptiveEngine } from './src/engine/AdaptiveEngine';
 import { INITIAL_POSTS } from './src/services/aiCaptionService';
 import { Compass, Bell } from 'lucide-react-native';
 
-// Hafif Keşfet Ekranı
 function ExplorePlaceholderScreen() {
   const { theme } = useAccessibility();
   return (
@@ -19,13 +18,12 @@ function ExplorePlaceholderScreen() {
       <Compass size={40} color={theme.colors.textMuted} />
       <Text style={[styles.placeholderTitle, { color: theme.colors.text }]}>Keşfet</Text>
       <Text style={[styles.placeholderSub, { color: theme.colors.textMuted }]}>
-        NSosyal gündemindeki popüler konular ve erişilebilir içerikler burada yer alır.
+        NSosyal gündemindeki erişilebilir konular ve paylaşımlar burada yer alır.
       </Text>
     </View>
   );
 }
 
-// Hafif Bildirimler Ekranı
 function NotificationsPlaceholderScreen() {
   const { theme } = useAccessibility();
   return (
@@ -33,20 +31,19 @@ function NotificationsPlaceholderScreen() {
       <Bell size={40} color={theme.colors.textMuted} />
       <Text style={[styles.placeholderTitle, { color: theme.colors.text }]}>Bildirimler</Text>
       <Text style={[styles.placeholderSub, { color: theme.colors.textMuted }]}>
-        Yeni etkileşimler ve sesli/görsel uyarı bildirimleriniz burada listelenir.
+        Etkileşim bildirimleriniz ve görsel/sesli duyurularınız burada listelenir.
       </Text>
     </View>
   );
 }
 
 function MainApp() {
-  const { currentMode, setMode, theme } = useAccessibility();
-  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(true); // Gerçek uygulama gibi doğrudan akışta başlar
-  const [activeTab, setActiveTab] = useState('feed'); // 'feed' | 'explore' | 'create' | 'notifications' | 'settings'
+  const { currentMode, selectMode, theme } = useAccessibility();
+  const [isOnboarding, setIsOnboarding] = useState(true); // İlk açılışta mod seçimiyle başlar
+  const [activeTab, setActiveTab] = useState('feed');
   const [posts, setPosts] = useState(INITIAL_POSTS);
   const [activeSuggestion, setActiveSuggestion] = useState(null);
 
-  // Uyarlanabilir Öneri Motoru Referansı
   const engineRef = useRef(null);
 
   useEffect(() => {
@@ -57,7 +54,7 @@ function MainApp() {
 
   const handleAcceptSuggestion = () => {
     if (activeSuggestion) {
-      setMode(activeSuggestion.mode);
+      selectMode(activeSuggestion.mode);
       setActiveSuggestion(null);
     }
   };
@@ -80,7 +77,7 @@ function MainApp() {
         backgroundColor={isHighContrast ? '#000000' : '#FFFFFF'}
       />
 
-      {/* Telefon Gövdesi Mockup'ı (Masaüstünde odaklanmış gerçek telefon en-boy oranı) */}
+      {/* Telefon Gövdesi Mockup'ı */}
       <View
         style={[
           styles.deviceFrame,
@@ -98,43 +95,59 @@ function MainApp() {
           </View>
         )}
 
-        {/* Üst Çubuk (Ayarlar ve Paylaşım hariç her yerde) */}
-        {activeTab !== 'settings' && activeTab !== 'create' && (
-          <Header onOpenAccessibility={() => setActiveTab('settings')} />
+        {/* 1. EĞER HENÜZ MOD SEÇİLMEDİYSE: KARŞILAMA VE MOD SEÇİM EKRANI */}
+        {isOnboarding ? (
+          <OnboardingScreen
+            onComplete={() => {
+              setIsOnboarding(false);
+              setActiveTab('feed');
+            }}
+          />
+        ) : (
+          /* 2. MOD SEÇİLDİ: UYGULAMA SEÇİLEN MODUN ŞEKLİNDE DEVAM EDER */
+          <>
+            {/* Üst Çubuk */}
+            {activeTab !== 'settings' && activeTab !== 'create' && (
+              <Header onOpenAccessibility={() => setActiveTab('settings')} />
+            )}
+
+            {/* Gövde */}
+            <View style={styles.tabContent}>
+              {activeTab === 'feed' && (
+                <FeedScreen
+                  posts={posts}
+                  suggestion={activeSuggestion}
+                  onAcceptSuggestion={handleAcceptSuggestion}
+                  onDismissSuggestion={handleDismissSuggestion}
+                />
+              )}
+
+              {activeTab === 'explore' && <ExplorePlaceholderScreen />}
+
+              {activeTab === 'create' && (
+                <CreatePostScreen
+                  onBack={() => setActiveTab('feed')}
+                  onPostCreated={handlePostCreated}
+                />
+              )}
+
+              {activeTab === 'notifications' && <NotificationsPlaceholderScreen />}
+
+              {activeTab === 'settings' && (
+                <AccessibilitySettingsScreen
+                  onBack={() => setActiveTab('feed')}
+                  onResetToOnboarding={() => setIsOnboarding(true)}
+                />
+              )}
+            </View>
+
+            {/* Alt Gezinme Çubuğu */}
+            <BottomNavBar
+              activeTab={activeTab}
+              onTabChange={(newTab) => setActiveTab(newTab)}
+            />
+          </>
         )}
-
-        {/* Sekme Gövdesi */}
-        <View style={styles.tabContent}>
-          {activeTab === 'feed' && (
-            <FeedScreen
-              posts={posts}
-              suggestion={activeSuggestion}
-              onAcceptSuggestion={handleAcceptSuggestion}
-              onDismissSuggestion={handleDismissSuggestion}
-            />
-          )}
-
-          {activeTab === 'explore' && <ExplorePlaceholderScreen />}
-
-          {activeTab === 'create' && (
-            <CreatePostScreen
-              onBack={() => setActiveTab('feed')}
-              onPostCreated={handlePostCreated}
-            />
-          )}
-
-          {activeTab === 'notifications' && <NotificationsPlaceholderScreen />}
-
-          {activeTab === 'settings' && (
-            <AccessibilitySettingsScreen onBack={() => setActiveTab('feed')} />
-          )}
-        </View>
-
-        {/* Alt Gezinme Çubuğu (Bottom Navigation Bar) */}
-        <BottomNavBar
-          activeTab={activeTab}
-          onTabChange={(newTab) => setActiveTab(newTab)}
-        />
       </View>
     </SafeAreaView>
   );
@@ -151,7 +164,7 @@ export default function App() {
 const styles = StyleSheet.create({
   outerContainer: {
     flex: 1,
-    backgroundColor: '#0F172A', // Sade, şık koyu sahne arkaplanı
+    backgroundColor: '#0F172A',
     justifyContent: 'center',
     alignItems: 'center',
   },

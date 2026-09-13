@@ -4,65 +4,68 @@ const AccessibilityContext = createContext();
 
 export const MODES = {
   STANDARD: 'standard',
-  VISUAL: 'visual',         // Görme Engelli / Az Gören (Yüksek Kontrast, Ekran Okuyucu, Büyük Yazı)
-  HEARING: 'hearing',       // İşitme Engelli (Otomatik Altyazı, Görsel Titreşim)
-  NEURO: 'neuro',           // Nörogelişimsel Farklılık (DEHB/Otizm - Sakin, Sıfır Animasyon, Bionic Reading)
+  VISUAL: 'visual',         // Görme Engelli / Az Gören (Yüksek Kontrast, Büyük Hedefler, Sesli Betimleme)
+  HEARING: 'hearing',       // İşitme Engelli (Sürekli Altyazı, Görsel Bildirim, Ses Rozetleri)
+  NEURO: 'neuro',           // Nörogelişimsel (DEHB/Otizm - Bionic Reading, Sıfır Animasyon, Sakin Arayüz)
 };
 
 export const AccessibilityProvider = ({ children }) => {
-  const [currentMode, setCurrentMode] = useState(MODES.STANDARD);
-  const [fontSizeScale, setFontSizeScale] = useState(1.0); // 1.0, 1.2, 1.4
+  const [currentMode, setCurrentMode] = useState(null); // Başlangıçta null, kullanıcı seçim yapınca mod giyilir
+  const [fontSizeScale, setFontSizeScale] = useState(1.0);
+  const [bionicReading, setBionicReading] = useState(false);
+  const [alwaysCaptions, setAlwaysCaptions] = useState(false);
+  const [hideClutter, setHideClutter] = useState(false);
   const [adaptiveEngineActive, setAdaptiveEngineActive] = useState(true);
   const [pendingSuggestion, setPendingSuggestion] = useState(null);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [speakingText, setSpeakingText] = useState('');
-  const [bionicReadingEnabled, setBionicReadingEnabled] = useState(false);
-  const [talkBackActive, setTalkBackActive] = useState(false);
 
-  // Mod değiştiğinde otomatik ayarlar
-  useEffect(() => {
-    if (currentMode === MODES.VISUAL) {
-      setFontSizeScale(1.25);
-      setBionicReadingEnabled(false);
-    } else if (currentMode === MODES.NEURO) {
+  // Mod Seçildiğinde Uygulamanın Davranışını ve Şeklini Belirle
+  const selectMode = (mode) => {
+    setCurrentMode(mode);
+    if (mode === MODES.VISUAL) {
+      setFontSizeScale(1.3);
+      setBionicReading(false);
+      setAlwaysCaptions(false);
+      setHideClutter(false);
+    } else if (mode === MODES.HEARING) {
+      setFontSizeScale(1.05);
+      setBionicReading(false);
+      setAlwaysCaptions(true);
+      setHideClutter(false);
+    } else if (mode === MODES.NEURO) {
       setFontSizeScale(1.1);
-      setBionicReadingEnabled(true);
+      setBionicReading(true);
+      setAlwaysCaptions(false);
+      setHideClutter(true); // Dikkat dağıtıcı beğeni sayıları ve animasyonları gizler
     } else {
       setFontSizeScale(1.0);
-      setBionicReadingEnabled(false);
-    }
-  }, [currentMode]);
-
-  const setMode = (mode) => {
-    setCurrentMode(mode);
-  };
-
-  // Kontrast oranı hesaplayıcı (Jüri Metriği)
-  const getContrastRatio = () => {
-    switch (currentMode) {
-      case MODES.VISUAL:
-        return { ratio: '16.1 : 1', level: 'AAA (Üst Düzey)', pass: true, color: '#22C55E' };
-      case MODES.NEURO:
-        return { ratio: '11.8 : 1', level: 'AAA (Yumuşak)', pass: true, color: '#22C55E' };
-      case MODES.HEARING:
-        return { ratio: '8.4 : 1', level: 'AAA (Yüksek)', pass: true, color: '#22C55E' };
-      default:
-        return { ratio: '5.2 : 1', level: 'AA (Standart)', pass: true, color: '#3B82F6' };
+      setBionicReading(false);
+      setAlwaysCaptions(false);
+      setHideClutter(false);
     }
   };
 
-  // Tema Renk Paletleri (WCAG 2.2 AA ve AAA Uyumlu)
+  // Seçilen Moda Özel Renk Paleti ve Tasarım Dili
+  const isVisual = currentMode === MODES.VISUAL;
+  const isHearing = currentMode === MODES.HEARING;
+  const isNeuro = currentMode === MODES.NEURO;
+  const isStandard = currentMode === MODES.STANDARD || currentMode === null;
+
   const theme = {
     mode: currentMode,
-    isHighContrast: currentMode === MODES.VISUAL,
-    isNeuro: currentMode === MODES.NEURO,
-    isHearing: currentMode === MODES.HEARING,
+    isVisual,
+    isHearing,
+    isNeuro,
+    isStandard,
+    isHighContrast: isVisual,
     fontSizeScale,
-    colors: currentMode === MODES.VISUAL
+    bionicReading,
+    alwaysCaptions,
+    hideClutter,
+    colors: isVisual
       ? {
-          // Yüksek Kontrast (Saf Siyah / Sarı / Beyaz - WCAG AAA 16:1)
+          // GÖRME MODU: Saf Siyah, Canlı Sarı (#FFE600), Beyaz (#FFFFFF) - 16:1 Kontrast
           background: '#000000',
-          cardBackground: '#121212',
+          cardBackground: '#0F0F0F',
           cardBorder: '#FFE600',
           text: '#FFFFFF',
           textMuted: '#FFE600',
@@ -70,14 +73,32 @@ export const AccessibilityProvider = ({ children }) => {
           primaryText: '#000000',
           accent: '#00FFFF',
           border: '#FFE600',
-          inputBg: '#1A1A1A',
-          bannerBg: '#FFE600',
-          bannerText: '#000000',
+          inputBg: '#1C1C1C',
+          navBg: '#000000',
+          activeNav: '#FFE600',
+          inactiveNav: '#888888',
         }
-      : currentMode === MODES.NEURO
+      : isHearing
       ? {
-          // Nörogelişimsel Sakin Mod (DEHB / Otizm - Sakin gri-mavi palet)
-          background: '#F1F5F9',
+          // İŞİTME MODU: Okyanus Mavisi, Canlı Turkuaz, Net Beyaz Kontrast
+          background: '#F0F7FF',
+          cardBackground: '#FFFFFF',
+          cardBorder: '#0284C7',
+          text: '#082F49',
+          textMuted: '#0369A1',
+          primary: '#0284C7',
+          primaryText: '#FFFFFF',
+          accent: '#06B6D4',
+          border: '#BAE6FD',
+          inputBg: '#F8FAFC',
+          navBg: '#FFFFFF',
+          activeNav: '#0284C7',
+          inactiveNav: '#64748B',
+        }
+      : isNeuro
+      ? {
+          // NÖROGELİŞİMSEL SAKİN MOD: Pastel Adaçayı / Soft Teal, Göz Yormayan Gri
+          background: '#F4F6F8',
           cardBackground: '#FFFFFF',
           cardBorder: '#CBD5E1',
           text: '#1E293B',
@@ -87,39 +108,25 @@ export const AccessibilityProvider = ({ children }) => {
           accent: '#14B8A6',
           border: '#E2E8F0',
           inputBg: '#F8FAFC',
-          bannerBg: '#CCFBF1',
-          bannerText: '#0F766E',
-        }
-      : currentMode === MODES.HEARING
-      ? {
-          // İşitme Engelli Modu (Açık ve net görsel bildirim rengi)
-          background: '#F0F9FF',
-          cardBackground: '#FFFFFF',
-          cardBorder: '#0284C7',
-          text: '#0C4A6E',
-          textMuted: '#0369A1',
-          primary: '#0284C7',
-          primaryText: '#FFFFFF',
-          accent: '#38BDF8',
-          border: '#BAE6FD',
-          inputBg: '#F8FAFC',
-          bannerBg: '#E0F2FE',
-          bannerText: '#0369A1',
+          navBg: '#FFFFFF',
+          activeNav: '#0D9488',
+          inactiveNav: '#94A3B8',
         }
       : {
-          // Standart NSosyal Teması
+          // STANDART MOD: Modern NSosyal Mavisi ve Temiz Beyaz
           background: '#F8FAFC',
           cardBackground: '#FFFFFF',
           cardBorder: '#E2E8F0',
           text: '#0F172A',
-          textMuted: '#475569',
+          textMuted: '#64748B',
           primary: '#2563EB',
           primaryText: '#FFFFFF',
           accent: '#3B82F6',
-          border: '#CBD5E1',
+          border: '#E2E8F0',
           inputBg: '#F1F5F9',
-          bannerBg: '#DBEAFE',
-          bannerText: '#1E40AF',
+          navBg: '#FFFFFF',
+          activeNav: '#2563EB',
+          inactiveNav: '#64748B',
         },
   };
 
@@ -127,23 +134,18 @@ export const AccessibilityProvider = ({ children }) => {
     <AccessibilityContext.Provider
       value={{
         currentMode,
-        setMode,
+        selectMode,
         theme,
         fontSizeScale,
         setFontSizeScale,
+        bionicReading,
+        setBionicReading,
+        alwaysCaptions,
+        hideClutter,
         adaptiveEngineActive,
         setAdaptiveEngineActive,
         pendingSuggestion,
         setPendingSuggestion,
-        isSpeaking,
-        setIsSpeaking,
-        speakingText,
-        setSpeakingText,
-        bionicReadingEnabled,
-        setBionicReadingEnabled,
-        talkBackActive,
-        setTalkBackActive,
-        contrastInfo: getContrastRatio(),
       }}
     >
       {children}

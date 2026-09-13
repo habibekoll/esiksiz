@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Switch } from 'react-native';
 import { useAccessibility, MODES } from '../context/AccessibilityContext';
-import { Eye, Volume2, Sparkles, LayoutGrid, Check, ArrowLeft, Type, Cpu } from 'lucide-react-native';
+import { Eye, Volume2, Sparkles, LayoutGrid, Check, ArrowLeft, RefreshCcw } from 'lucide-react-native';
 
-export const AccessibilitySettingsScreen = ({ onBack }) => {
+export const AccessibilitySettingsScreen = ({ onBack, onResetToOnboarding }) => {
   const {
     currentMode,
-    setMode,
+    selectMode,
     theme,
     fontSizeScale,
     setFontSizeScale,
@@ -15,19 +15,13 @@ export const AccessibilitySettingsScreen = ({ onBack }) => {
   } = useAccessibility();
 
   const colors = theme.colors;
-  const isHighContrast = theme.isHighContrast;
+  const isVisual = theme.isVisual;
 
   const modeList = [
     {
-      id: MODES.STANDARD,
-      title: 'Standart Görünüm',
-      desc: 'NSosyal varsayılan modern tasarım ve arayüzü.',
-      icon: LayoutGrid,
-    },
-    {
       id: MODES.VISUAL,
       title: 'Görme Desteği & Yüksek Kontrast',
-      desc: '16:1 kontrast (Siyah/Sarı), büyük yazılar ve sesli görsel betimleme.',
+      desc: '16:1 kontrast (Siyah/Sarı), büyük dokunmatik butonlar ve sesli görsel betimleme.',
       icon: Eye,
     },
     {
@@ -39,8 +33,14 @@ export const AccessibilitySettingsScreen = ({ onBack }) => {
     {
       id: MODES.NEURO,
       title: 'Nörogelişimsel Sakin Mod (DEHB / Otizm)',
-      desc: 'Dikkati dağıtan animasyonlar kapalı, pastel renkler ve sade tek sütun.',
+      desc: 'Bionic Reading, sıfır animasyon, pastel tonlar ve sade tek sütun.',
       icon: Sparkles,
+    },
+    {
+      id: MODES.STANDARD,
+      title: 'Standart Görünüm',
+      desc: 'NSosyal varsayılan modern tasarım ve akışı.',
+      icon: LayoutGrid,
     },
   ];
 
@@ -50,7 +50,7 @@ export const AccessibilitySettingsScreen = ({ onBack }) => {
       contentContainerStyle={styles.content}
       accessible={true}
       accessibilityRole="region"
-      accessibilityLabel="Erişilebilirlik Ayarları Ekranı"
+      accessibilityLabel="Erişilebilirlik ve Deneyim Ayarları"
     >
       {/* Üst Başlık */}
       <View style={[styles.headerRow, { borderBottomColor: colors.border }]}>
@@ -59,24 +59,24 @@ export const AccessibilitySettingsScreen = ({ onBack }) => {
             onPress={onBack}
             style={[
               styles.backBtn,
-              { backgroundColor: isHighContrast ? '#FFE600' : colors.inputBg },
+              { backgroundColor: isVisual ? '#FFE600' : colors.inputBg },
             ]}
             accessible={true}
             accessibilityRole="button"
             accessibilityLabel="Geri dön"
           >
-            <ArrowLeft size={20} color={isHighContrast ? '#000000' : colors.text} />
+            <ArrowLeft size={20} color={isVisual ? '#000000' : colors.text} />
           </TouchableOpacity>
         )}
         <Text style={[styles.headerTitle, { color: colors.text }]}>
-          Erişilebilirlik ve Görünüm
+          Erişilebilirlik & Deneyim Modu
         </Text>
       </View>
 
-      {/* 1. Mod Seçimi Bölümü */}
+      {/* 1. Deneyim Modu Seçimi */}
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
-          DENEYİM MODU
+          AKTİF MODU DEĞİŞTİR (UYGULAMA ANINDA DÖNÜŞÜR)
         </Text>
 
         <View style={styles.cardGroup}>
@@ -87,7 +87,7 @@ export const AccessibilitySettingsScreen = ({ onBack }) => {
             return (
               <TouchableOpacity
                 key={item.id}
-                onPress={() => setMode(item.id)}
+                onPress={() => selectMode(item.id)}
                 style={[
                   styles.modeRow,
                   {
@@ -99,14 +99,14 @@ export const AccessibilitySettingsScreen = ({ onBack }) => {
                 accessible={true}
                 accessibilityRole="radio"
                 accessibilityState={{ selected: isSelected }}
-                accessibilityLabel={`${item.title}. ${item.desc}. ${isSelected ? 'Seçili.' : 'Seçmek için tıklayın.'}`}
+                accessibilityLabel={`${item.title}. ${item.desc}. ${isSelected ? 'Aktif mod.' : 'Geçmek için tıklayın.'}`}
               >
                 <View
                   style={[
                     styles.iconBox,
                     {
                       backgroundColor: isSelected
-                        ? isHighContrast
+                        ? isVisual
                           ? '#FFE600'
                           : colors.primary
                         : colors.inputBg,
@@ -117,7 +117,7 @@ export const AccessibilitySettingsScreen = ({ onBack }) => {
                     size={20}
                     color={
                       isSelected
-                        ? isHighContrast
+                        ? isVisual
                           ? '#000000'
                           : '#FFFFFF'
                         : colors.textMuted
@@ -138,12 +138,12 @@ export const AccessibilitySettingsScreen = ({ onBack }) => {
                   <View
                     style={[
                       styles.checkCircle,
-                      { backgroundColor: isHighContrast ? '#FFE600' : colors.primary },
+                      { backgroundColor: isVisual ? '#FFE600' : colors.primary },
                     ]}
                   >
                     <Check
                       size={14}
-                      color={isHighContrast ? '#000000' : '#FFFFFF'}
+                      color={isVisual ? '#000000' : '#FFFFFF'}
                       strokeWidth={3}
                     />
                   </View>
@@ -154,10 +154,10 @@ export const AccessibilitySettingsScreen = ({ onBack }) => {
         </View>
       </View>
 
-      {/* 2. Metin Boyutu Bölümü */}
+      {/* 2. Metin Boyutu */}
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
-          METİN BOYUTU (DYNAMIC TYPE)
+          YAZI TİPİ BOYUTU
         </Text>
         <View style={[styles.scaleContainer, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
           {[1.0, 1.25, 1.4].map((scale) => {
@@ -170,7 +170,7 @@ export const AccessibilitySettingsScreen = ({ onBack }) => {
                   styles.scaleBtn,
                   {
                     backgroundColor: isSelected
-                      ? isHighContrast
+                      ? isVisual
                         ? '#FFE600'
                         : colors.primary
                       : 'transparent',
@@ -178,17 +178,15 @@ export const AccessibilitySettingsScreen = ({ onBack }) => {
                 ]}
               >
                 <Text
-                  style={[
-                    styles.scaleBtnText,
-                    {
-                      color: isSelected
-                        ? isHighContrast
-                          ? '#000000'
-                          : '#FFFFFF'
-                        : colors.text,
-                      fontWeight: isSelected ? '800' : '600',
-                    },
-                  ]}
+                  style={{
+                    color: isSelected
+                      ? isVisual
+                        ? '#000000'
+                        : '#FFFFFF'
+                      : colors.text,
+                    fontWeight: isSelected ? '800' : '600',
+                    fontSize: 14,
+                  }}
                 >
                   %{Math.round(scale * 100)}
                 </Text>
@@ -198,28 +196,24 @@ export const AccessibilitySettingsScreen = ({ onBack }) => {
         </View>
       </View>
 
-      {/* 3. Uyarlanabilir Öneri Motoru Ayarı */}
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
-          YAPAY ZEKÂ & ADAPTİF SİSTEM
-        </Text>
-        <View style={[styles.settingRow, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
-          <View style={styles.settingTextContainer}>
-            <Text style={[styles.settingTitle, { color: colors.text }]}>
-              Uyarlanabilir Öneri Motoru
-            </Text>
-            <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
-              Kullanım alışkanlıklarınıza göre ihtiyacınız olan modu akıllıca teklif eder.
-            </Text>
-          </View>
-          <Switch
-            value={adaptiveEngineActive}
-            onValueChange={setAdaptiveEngineActive}
-            trackColor={{ false: '#94A3B8', true: isHighContrast ? '#FFE600' : '#2563EB' }}
-            thumbColor="#FFFFFF"
-          />
-        </View>
-      </View>
+      {/* 3. Başlangıç Seçim Ekranına Dönüş (Jüriye Baştan Göstermek İçin) */}
+      {onResetToOnboarding && (
+        <TouchableOpacity
+          onPress={onResetToOnboarding}
+          style={[
+            styles.resetBtn,
+            {
+              backgroundColor: colors.cardBackground,
+              borderColor: colors.border,
+            },
+          ]}
+        >
+          <RefreshCcw size={16} color={colors.text} />
+          <Text style={[styles.resetBtnText, { color: colors.text }]}>
+            Karşılama & Mod Seçim Ekranına Dön
+          </Text>
+        </TouchableOpacity>
+      )}
     </ScrollView>
   );
 };
@@ -238,7 +232,7 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingBottom: 14,
     borderBottomWidth: 1,
-    marginBottom: 18,
+    marginBottom: 16,
   },
   backBtn: {
     width: 40,
@@ -248,16 +242,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '800',
   },
   section: {
-    marginBottom: 22,
+    marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 11,
     fontWeight: '800',
-    letterSpacing: 0.6,
+    letterSpacing: 0.5,
     marginBottom: 8,
     marginLeft: 4,
   },
@@ -265,7 +259,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#CBD5E1',
   },
   modeRow: {
     flexDirection: 'row',
@@ -284,7 +278,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   modeTitle: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
   },
   modeDesc: {
@@ -314,28 +308,18 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     minHeight: 44,
   },
-  scaleBtnText: {
-    fontSize: 13,
-  },
-  settingRow: {
+  resetBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    gap: 8,
     padding: 14,
     borderRadius: 12,
     borderWidth: 1,
+    marginTop: 10,
   },
-  settingTextContainer: {
-    flex: 1,
-    marginRight: 12,
-  },
-  settingTitle: {
-    fontSize: 15,
+  resetBtnText: {
+    fontSize: 13,
     fontWeight: '700',
-  },
-  settingDesc: {
-    fontSize: 12,
-    marginTop: 2,
-    lineHeight: 16,
   },
 });

@@ -6,18 +6,18 @@ import { Eye, Volume2, Sparkles, Sliders } from 'lucide-react-native';
 export const Header = ({ onOpenAccessibility }) => {
   const { theme, currentMode } = useAccessibility();
   const colors = theme.colors;
-  const isHighContrast = theme.isHighContrast;
+  const isVisual = theme.isVisual;
 
   const getModeInfo = () => {
     switch (currentMode) {
       case MODES.VISUAL:
-        return { label: 'Görme', icon: Eye, color: '#FFE600', textColor: '#000000' };
+        return { label: 'Görme Modu', icon: Eye, color: '#FFE600', textColor: '#000000' };
       case MODES.HEARING:
-        return { label: 'İşitme', icon: Volume2, color: '#38BDF8', textColor: '#000000' };
+        return { label: 'İşitme Modu', icon: Volume2, color: '#E0F2FE', textColor: '#0284C7' };
       case MODES.NEURO:
-        return { label: 'Sakin', icon: Sparkles, color: '#0D9488', textColor: '#FFFFFF' };
+        return { label: 'Sakin Mod', icon: Sparkles, color: '#CCFBF1', textColor: '#0F766E' };
       default:
-        return { label: 'Eşiksiz', icon: Sliders, color: colors.inputBg, textColor: colors.text };
+        return { label: 'Erişilebilirlik', icon: Sliders, color: colors.inputBg, textColor: colors.text };
     }
   };
 
@@ -31,34 +31,35 @@ export const Header = ({ onOpenAccessibility }) => {
         {
           backgroundColor: colors.cardBackground,
           borderBottomColor: colors.border,
-          borderBottomWidth: isHighContrast ? 2 : 1,
+          borderBottomWidth: isVisual ? 2.5 : 1,
         },
       ]}
       accessible={true}
       accessibilityRole="header"
-      accessibilityLabel="NSosyal Ana Başlık"
+      accessibilityLabel="NSosyal Ana Başlık Alanı"
     >
-      {/* Temiz NSosyal Logosu */}
+      {/* NSosyal Logosu */}
       <View style={styles.logoRow}>
-        <Text style={[styles.logoText, { color: isHighContrast ? '#FFE600' : '#2563EB' }]}>
-          N<Text style={{ color: isHighContrast ? '#FFFFFF' : '#0F172A' }}>Sosyal</Text>
+        <Text style={[styles.logoText, { color: isVisual ? '#FFE600' : '#2563EB' }]}>
+          N<Text style={{ color: isVisual ? '#FFFFFF' : '#0F172A' }}>Sosyal</Text>
         </Text>
       </View>
 
-      {/* Doğal Erişilebilirlik Hızlı Butonu */}
+      {/* Aktif Mod Göstergesi / Ayarlara Geçiş Butonu */}
       <TouchableOpacity
         onPress={onOpenAccessibility}
         style={[
           styles.quickModeBtn,
           {
             backgroundColor: modeInfo.color,
-            borderColor: isHighContrast ? '#FFE600' : colors.border,
-            borderWidth: isHighContrast ? 2 : 1,
+            borderColor: isVisual ? '#FFE600' : colors.border,
+            borderWidth: isVisual ? 2 : 1,
+            minHeight: isVisual ? 44 : 38,
           },
         ]}
         accessible={true}
         accessibilityRole="button"
-        accessibilityLabel={`Erişilebilirlik ayarları. Aktif mod: ${modeInfo.label}`}
+        accessibilityLabel={`Aktif mod: ${modeInfo.label}. Ayarları açmak için dokunun.`}
       >
         <ModeIcon size={16} color={modeInfo.textColor} />
         <Text style={[styles.quickModeText, { color: modeInfo.textColor }]}>
@@ -72,7 +73,7 @@ export const Header = ({ onOpenAccessibility }) => {
 const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 20,
-    paddingVertical: 14,
+    paddingVertical: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -92,9 +93,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     paddingHorizontal: 12,
-    paddingVertical: 7,
+    paddingVertical: 6,
     borderRadius: 20,
-    minHeight: 40,
   },
   quickModeText: {
     fontSize: 12,
