@@ -1,14 +1,49 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Platform } from 'react-native';
 import { useAccessibility, MODES } from '../context/AccessibilityContext';
-import { Eye, Ear, Sparkles, LayoutGrid, ChevronRight, HandMetal, ShieldCheck } from 'lucide-react-native';
+import { SpeechService } from '../services/speechService';
+import { Eye, Ear, Sparkles, LayoutGrid, ChevronRight, HandMetal, ShieldCheck, Volume2, Headphones } from 'lucide-react-native';
 
 export const OnboardingScreen = ({ onComplete }) => {
   const { selectMode } = useAccessibility();
+  const hasSpokenWelcomeRef = useRef(false);
+
+  // Açılışta Sesli Yönlendirme (Görme engelli kullanıcının modu görmeden seçebilmesi için)
+  useEffect(() => {
+    if (!hasSpokenWelcomeRef.current) {
+      hasSpokenWelcomeRef.current = true;
+      setTimeout(() => {
+        SpeechService.speak(
+          'Eşiksiz NSosyal\'e hoş geldiniz. Görme desteği modunu etkinleştirmek için ekrana iki kez dokunun, veya klavyede 1 tuşuna basın.'
+        );
+      }, 600);
+    }
+
+    // Klavye kısayolu (Web için)
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      const handleKeyDown = (e) => {
+        if (e.key === '1' || e.key === 'g' || e.key === 'G' || e.code === 'Space') {
+          handleChooseMode(MODES.VISUAL);
+        } else if (e.key === '2' || e.key === 'i' || e.key === 'İ') {
+          handleChooseMode(MODES.HEARING);
+        } else if (e.key === '3') {
+          handleChooseMode(MODES.NEURO);
+        }
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, []);
 
   const handleChooseMode = (modeId) => {
     selectMode(modeId);
     onComplete();
+  };
+
+  const playVoiceInstructions = () => {
+    SpeechService.speak(
+      'Seçim Menüsü: 1. Görme desteği modu, 16:1 kontrast ve sesli görsel betimleme. 2. İşitme desteği modu, altyazı ve işaret dili. 3. Nörogelişimsel sakin mod, biyonik okuma ve odak cetveli. Seçmek için ekrandaki kartlara dokunun veya iki kez ekrana tıklayın.'
+    );
   };
 
   return (
@@ -18,7 +53,7 @@ export const OnboardingScreen = ({ onComplete }) => {
       showsVerticalScrollIndicator={false}
       accessible={true}
       accessibilityRole="region"
-      accessibilityLabel="Eşiksiz Evrensel Deneyim Seçim Ekranı"
+      accessibilityLabel="Eşiksiz Evrensel Deneyim Seçim Ekranı. Görme moduna geçmek için ekrana iki kez dokunun."
     >
       {/* Şık Başlık Alanı */}
       <View style={styles.headerArea}>
@@ -38,6 +73,23 @@ export const OnboardingScreen = ({ onComplete }) => {
         </Text>
       </View>
 
+      {/* GÖRME ENGELLİ SESLİ ÇAĞRI BANNER'I */}
+      <TouchableOpacity
+        onPress={playVoiceInstructions}
+        style={styles.voiceAssistantPrompt}
+        accessible={true}
+        accessibilityRole="button"
+        accessibilityLabel="Seçenekleri sesli dinle"
+      >
+        <Volume2 size={18} color="#1D4ED8" />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.voicePromptTitle}>🔊 Seçenekleri Sesli Dinle</Text>
+          <Text style={styles.voicePromptSub}>
+            Görme modu için ekrana 2 kez dokunun veya Boşluk / 1 tuşuna basın.
+          </Text>
+        </View>
+      </TouchableOpacity>
+
       {/* 5 Evrensel Deneyim Kartı */}
       <View style={styles.optionsList}>
         {/* 1. GÖRME ENGELLİ / AZ GÖREN */}
@@ -47,7 +99,7 @@ export const OnboardingScreen = ({ onComplete }) => {
           activeOpacity={0.85}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="Görme Desteği Modu."
+          accessibilityLabel="Görme Desteği Modu. Seçmek için dokunun veya 1 tuşuna basın."
         >
           <View style={styles.cardHeader}>
             <View style={[styles.iconPill, { backgroundColor: '#FFE600' }]}>
@@ -58,13 +110,13 @@ export const OnboardingScreen = ({ onComplete }) => {
             </View>
           </View>
           <Text style={[styles.cardTitle, { color: '#FFE600' }]}>
-            Görme Desteği & Sesli Betimleme
+            Görme Desteği & Sesli Betimleme (Kısayol: 1)
           </Text>
           <Text style={[styles.cardDescription, { color: '#FFFFFF' }]}>
-            Oftalmolojik 16.1:1 rekor kontrastla ışık parlamasını (fotofobi) sıfırlayan saf siyah zemin. Karta tek dokunuşla yazar, metin ve yapay zekâ görsel açıklamasını dinleyin.
+            Oftalmolojik 16.1:1 rekor kontrastla ışık parlamasını sıfırlayan saf siyah zemin. Karta tek dokunuşla yazar, metin ve yapay zekâ görsel açıklamasını kesintisiz dinleyin.
           </Text>
           <View style={styles.actionPromptRow}>
-            <Text style={[styles.actionPromptText, { color: '#FFE600' }]}>Bu Modla Başla</Text>
+            <Text style={[styles.actionPromptText, { color: '#FFE600' }]}>Bu Modla Başla 👉</Text>
             <ChevronRight size={18} color="#FFE600" />
           </View>
         </TouchableOpacity>
@@ -76,7 +128,7 @@ export const OnboardingScreen = ({ onComplete }) => {
           activeOpacity={0.85}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="İşitme Desteği Modu."
+          accessibilityLabel="İşitme Desteği Modu. Seçmek için dokunun veya 2 tuşuna basın."
         >
           <View style={styles.cardHeader}>
             <View style={[styles.iconPill, { backgroundColor: '#0284C7' }]}>
@@ -87,13 +139,13 @@ export const OnboardingScreen = ({ onComplete }) => {
             </View>
           </View>
           <Text style={[styles.cardTitle, { color: '#0369A1' }]}>
-            İşitme Desteği & Ortam Sesleri
+            İşitme Desteği & Ortam Sesleri (Kısayol: 2)
           </Text>
           <Text style={[styles.cardDescription, { color: '#334155' }]}>
             Duyulamayan çevresel seslerin (müzik, alkış, efektler) detaylı metin betimlemesi, senkronize altyazı ve Türk İşaret Dili (TİD) avatarı.
           </Text>
           <View style={styles.actionPromptRow}>
-            <Text style={[styles.actionPromptText, { color: '#0284C7' }]}>Bu Modla Başla</Text>
+            <Text style={[styles.actionPromptText, { color: '#0284C7' }]}>Bu Modla Başla 👉</Text>
             <ChevronRight size={18} color="#0284C7" />
           </View>
         </TouchableOpacity>
@@ -105,7 +157,7 @@ export const OnboardingScreen = ({ onComplete }) => {
           activeOpacity={0.85}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="Nörogelişimsel Sakin Mod."
+          accessibilityLabel="Nörogelişimsel Sakin Mod. Seçmek için dokunun veya 3 tuşuna basın."
         >
           <View style={styles.cardHeader}>
             <View style={[styles.iconPill, { backgroundColor: '#0D9488' }]}>
@@ -122,7 +174,7 @@ export const OnboardingScreen = ({ onComplete }) => {
             Kelimelerin baş harflerini kalınlaştıran Biyonik Okuma, satır kaydırmayı engelleyen odak cetveli ve duyusal yorgunluğu arındıran sade akış.
           </Text>
           <View style={styles.actionPromptRow}>
-            <Text style={[styles.actionPromptText, { color: '#0D9488' }]}>Bu Modla Başla</Text>
+            <Text style={[styles.actionPromptText, { color: '#0D9488' }]}>Bu Modla Başla 👉</Text>
             <ChevronRight size={18} color="#0D9488" />
           </View>
         </TouchableOpacity>
@@ -151,7 +203,7 @@ export const OnboardingScreen = ({ onComplete }) => {
             Titreyen veya hassas hareket kısıtı olan eller için 56px dev dokunma hedefleri, geniş tıklama toleransı ve basitleştirilmiş arayüz.
           </Text>
           <View style={styles.actionPromptRow}>
-            <Text style={[styles.actionPromptText, { color: '#7C3AED' }]}>Bu Modla Başla</Text>
+            <Text style={[styles.actionPromptText, { color: '#7C3AED' }]}>Bu Modla Başla 👉</Text>
             <ChevronRight size={18} color="#7C3AED" />
           </View>
         </TouchableOpacity>
@@ -180,7 +232,7 @@ export const OnboardingScreen = ({ onComplete }) => {
             Sosyal medyanın varsayılan zengin içerik akışı ve modern etkileşim tasarımı.
           </Text>
           <View style={styles.actionPromptRow}>
-            <Text style={[styles.actionPromptText, { color: '#475569' }]}>Bu Modla Başla</Text>
+            <Text style={[styles.actionPromptText, { color: '#475569' }]}>Bu Modla Başla 👉</Text>
             <ChevronRight size={18} color="#475569" />
           </View>
         </TouchableOpacity>
@@ -199,7 +251,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   headerArea: {
-    marginBottom: 20,
+    marginBottom: 14,
   },
   brandRow: {
     flexDirection: 'row',
@@ -240,6 +292,28 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#64748B',
     lineHeight: 18,
+  },
+  voiceAssistantPrompt: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#EFF6FF',
+    borderColor: '#93C5FD',
+    borderWidth: 1.5,
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 16,
+  },
+  voicePromptTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#1E40AF',
+  },
+  voicePromptSub: {
+    fontSize: 11,
+    color: '#1E3A8A',
+    marginTop: 2,
+    lineHeight: 15,
   },
   optionsList: {
     gap: 14,
