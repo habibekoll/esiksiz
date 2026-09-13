@@ -1,14 +1,14 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { SpeechService } from '../services/speechService';
-import { Platform } from 'react-native';
 
 const AccessibilityContext = createContext();
 
 export const MODES = {
   STANDARD: 'standard',
-  VISUAL: 'visual',         // Görme Engelli / Az Gören (Yüksek Kontrast, Tüm Kart Sesli, Sesli Rehber)
-  HEARING: 'hearing',       // İşitme Engelli (Sürekli Altyazı, Ortam Sesleri Betimlemesi)
-  NEURO: 'neuro',           // Nörogelişimsel (DEHB/Otizm - Bionic Reading, Sıfır Animasyon)
+  VISUAL: 'visual',         // Görme Engelli & Az Gören (Yazı+Görsel Seslendirme, 16:1 Kontrast)
+  HEARING: 'hearing',       // İşitme Engelli & Sağır (Ortam Sesleri Betimlemesi, Altyazı, TİD İşaret Dili)
+  NEURO: 'neuro',           // Nörogelişimsel / DEHB / Otizm (Bionic Reading, Duyusal Sakinlik)
+  MOTOR: 'motor',           // Fiziksel & Motor Beceri / El Titremesi (Dev Hedefler, Basit Gezinme)
 };
 
 export const AccessibilityProvider = ({ children }) => {
@@ -17,59 +17,81 @@ export const AccessibilityProvider = ({ children }) => {
   const [bionicReading, setBionicReading] = useState(false);
   const [alwaysCaptions, setAlwaysCaptions] = useState(false);
   const [hideClutter, setHideClutter] = useState(false);
+  const [tidActive, setTidActive] = useState(false); // Türk İşaret Dili Avatarı
+  const [focusRulerActive, setFocusRulerActive] = useState(false); // DEHB Okuma Cetveli
   const [adaptiveEngineActive, setAdaptiveEngineActive] = useState(true);
   const [pendingSuggestion, setPendingSuggestion] = useState(null);
 
-  // Mod Seçildiğinde Uygulamanın Davranışını Belirle
+  // Mod Seçildiğinde Uygulamanın Halini ve Kurallarını Belirle
   const selectMode = (mode) => {
     setCurrentMode(mode);
+
     if (mode === MODES.VISUAL) {
       setFontSizeScale(1.3);
       setBionicReading(false);
       setAlwaysCaptions(false);
       setHideClutter(false);
+      setTidActive(false);
+      setFocusRulerActive(false);
 
-      // Görme Engelli Birey İçin Otomatik Sesli Karşılama ve Yönlendirme (Voice Guidance)
+      // Görme Engelli Birey İçin Sesli Rehber Karşılama
       setTimeout(() => {
         SpeechService.speak(
-          'Görme desteği modu devrede. Ekrandaki herhangi bir gönderiye dokunarak hem yazıyı hem görsel açıklamasını dinleyebilirsiniz. Bilgisayarda Boşluk tuşu da okumayı başlatır.'
+          'Görme desteği modu devrede. Ekrandaki herhangi bir gönderiye dokunarak hem yazıyı hem görsel açıklamasını dinleyebilirsiniz. Boşluk tuşu da okumayı başlatır.'
         );
-      }, 400);
+      }, 350);
     } else if (mode === MODES.HEARING) {
       setFontSizeScale(1.05);
       setBionicReading(false);
       setAlwaysCaptions(true);
       setHideClutter(false);
+      setTidActive(true); // TİD İşaret dili kutucuğu açılır
+      setFocusRulerActive(false);
     } else if (mode === MODES.NEURO) {
       setFontSizeScale(1.1);
       setBionicReading(true);
       setAlwaysCaptions(false);
       setHideClutter(true);
+      setTidActive(false);
+      setFocusRulerActive(true);
+    } else if (mode === MODES.MOTOR) {
+      setFontSizeScale(1.25);
+      setBionicReading(false);
+      setAlwaysCaptions(false);
+      setHideClutter(true);
+      setTidActive(false);
+      setFocusRulerActive(false);
     } else {
       setFontSizeScale(1.0);
       setBionicReading(false);
       setAlwaysCaptions(false);
       setHideClutter(false);
+      setTidActive(false);
+      setFocusRulerActive(false);
     }
   };
 
   const isVisual = currentMode === MODES.VISUAL;
   const isHearing = currentMode === MODES.HEARING;
   const isNeuro = currentMode === MODES.NEURO;
+  const isMotor = currentMode === MODES.MOTOR;
 
   const theme = {
     mode: currentMode,
     isVisual,
     isHearing,
     isNeuro,
+    isMotor,
     isHighContrast: isVisual,
     fontSizeScale,
     bionicReading,
     alwaysCaptions,
     hideClutter,
+    tidActive,
+    focusRulerActive,
     colors: isVisual
       ? {
-          // GÖRME MODU: Saf Siyah, Canlı Sarı (#FFE600), Beyaz - 16:1 Kontrast
+          // GÖRME MODU: Saf Siyah, Canlı Sarı (#FFE600), Beyaz - 16:1 AAA Kontrast
           background: '#000000',
           cardBackground: '#0F0F0F',
           cardBorder: '#FFE600',
@@ -86,7 +108,7 @@ export const AccessibilityProvider = ({ children }) => {
         }
       : isHearing
       ? {
-          // İŞİTME MODU: Net Mavi ve Beyaz
+          // İŞİTME MODU: Net Okyanus Mavisi & Yüksek Okunabilirlik
           background: '#F0F7FF',
           cardBackground: '#FFFFFF',
           cardBorder: '#0284C7',
@@ -118,6 +140,23 @@ export const AccessibilityProvider = ({ children }) => {
           activeNav: '#0D9488',
           inactiveNav: '#94A3B8',
         }
+      : isMotor
+      ? {
+          // MOTOR / FİZİKSEL ENGEL MODU: Büyük Mor Vurgu, Yüksek Görünürlük
+          background: '#FAF5FF',
+          cardBackground: '#FFFFFF',
+          cardBorder: '#7C3AED',
+          text: '#2E1065',
+          textMuted: '#6D28D9',
+          primary: '#7C3AED',
+          primaryText: '#FFFFFF',
+          accent: '#A855F7',
+          border: '#DDD6FE',
+          inputBg: '#F5F3FF',
+          navBg: '#FFFFFF',
+          activeNav: '#7C3AED',
+          inactiveNav: '#7C3AED',
+        }
       : {
           // STANDART MOD
           background: '#F8FAFC',
@@ -145,8 +184,13 @@ export const AccessibilityProvider = ({ children }) => {
         fontSizeScale,
         setFontSizeScale,
         bionicReading,
+        setBionicReading,
         alwaysCaptions,
         hideClutter,
+        tidActive,
+        setTidActive,
+        focusRulerActive,
+        setFocusRulerActive,
         adaptiveEngineActive,
         setAdaptiveEngineActive,
         pendingSuggestion,

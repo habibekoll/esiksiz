@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { useAccessibility, MODES } from '../context/AccessibilityContext';
-import { Eye, Ear, Sparkles, LayoutGrid, ArrowRight } from 'lucide-react-native';
+import { Eye, Ear, Sparkles, LayoutGrid, ArrowRight, HandMetal, ShieldCheck } from 'lucide-react-native';
 
 export const OnboardingScreen = ({ onComplete }) => {
   const { selectMode } = useAccessibility();
@@ -18,7 +18,7 @@ export const OnboardingScreen = ({ onComplete }) => {
       showsVerticalScrollIndicator={false}
       accessible={true}
       accessibilityRole="region"
-      accessibilityLabel="Eşiksiz Deneyim ve Mod Belirleme Ekranı"
+      accessibilityLabel="Eşiksiz Evrensel Mod Belirleme Ekranı"
     >
       <View style={styles.headerArea}>
         <Text style={styles.appBrand}>
@@ -26,11 +26,11 @@ export const OnboardingScreen = ({ onComplete }) => {
         </Text>
         <Text style={styles.mainTitle}>Size En Uygun Deneyimi Seçin</Text>
         <Text style={styles.subTitle}>
-          İhtiyacınıza uygun modu seçtiğinizde uygulama tamamen o modun kurallarına göre çalışacaktır.
+          Eşiksiz, seçtiğiniz bireysel ihtiyaca göre uygulamanın tüm görsel ve işitsel yapısını anında dönüştürür.
         </Text>
       </View>
 
-      {/* 4 Ana Seçenek Kartı */}
+      {/* 5 Kapsamlı Seçenek Kartı */}
       <View style={styles.optionsList}>
         {/* 1. GÖRME ENGELLİ / AZ GÖREN */}
         <TouchableOpacity
@@ -38,7 +38,7 @@ export const OnboardingScreen = ({ onComplete }) => {
           style={[styles.card, styles.cardVisual]}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="Görme Desteği Modu. Yazıyı ve görseli sesli dinleme, yüksek kontrast sarı-siyah arayüz."
+          accessibilityLabel="Görme Desteği Modu. Yazı ve görsel seslendirme, 16'ya 1 sarı-siyah zıtlık."
         >
           <View style={styles.cardHeader}>
             <View style={[styles.iconPill, { backgroundColor: '#FFE600' }]}>
@@ -50,17 +50,17 @@ export const OnboardingScreen = ({ onComplete }) => {
             Görme Desteği (Sesli Okuma & Betimleme)
           </Text>
           <Text style={[styles.cardDescription, { color: '#FFFFFF' }]}>
-            Hem paylaşılan yazıyı hem de varsa görselin detaylı betimlemesini tek tıkla sesli dinleme imkânı. Saf siyah zemin ve 16:1 kontrastlı sarı tipografi.
+            Hem paylaşılan yazıyı hem görsel açıklamasını tek dokunuşla sesli dinleme imkânı. Saf siyah zemin ve 16:1 kontrastlı sarı tipografi.
           </Text>
         </TouchableOpacity>
 
-        {/* 2. İŞİTME ENGELLİ (SAĞIR) */}
+        {/* 2. İŞİTME ENGELLİ & SAĞIR */}
         <TouchableOpacity
           onPress={() => handleChooseMode(MODES.HEARING)}
           style={[styles.card, styles.cardHearing]}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="İşitme Desteği Modu. Duyulamayan seslerin metin betimlemesi ve altyazı."
+          accessibilityLabel="İşitme Desteği Modu. Duyulamayan ortam sesleri betimlemesi, altyazı ve Türk İşaret Dili."
         >
           <View style={styles.cardHeader}>
             <View style={[styles.iconPill, { backgroundColor: '#0284C7' }]}>
@@ -69,10 +69,10 @@ export const OnboardingScreen = ({ onComplete }) => {
             <ArrowRight size={20} color="#0284C7" />
           </View>
           <Text style={[styles.cardTitle, { color: '#0369A1' }]}>
-            İşitme Desteği (Ses & Ortam Betimlemesi)
+            İşitme Desteği (Ses Betimlemesi & TİD)
           </Text>
           <Text style={[styles.cardDescription, { color: '#334155' }]}>
-            Videolardaki konuşmaların yanı sıra duyamadığınız çevresel seslerin, müziklerin ve alkışların detaylı metin betimlemesi.
+            Duyulamayan çevresel seslerin (müzik, alkış, efektler) detaylı metin betimlemesi, canlı altyazı ve Türk İşaret Dili (TİD) desteği.
           </Text>
         </TouchableOpacity>
 
@@ -91,14 +91,36 @@ export const OnboardingScreen = ({ onComplete }) => {
             <ArrowRight size={20} color="#0D9488" />
           </View>
           <Text style={[styles.cardTitle, { color: '#0F766E' }]}>
-            Nörogelişimsel Sakin (DEHB / Otizm)
+            Nörogelişimsel Sakin Mod (DEHB / Otizm)
           </Text>
           <Text style={[styles.cardDescription, { color: '#334155' }]}>
-            Kelimelerin ilk harflerini kalınlaştıran Bionic Reading ile hızlı odaklanma, sıfır animasyon ve duyusal yükü azaltılmış sade akış.
+            Kelimelerin ilk harflerini kalınlaştıran Bionic Reading, odak cetveli, sıfır animasyon ve duyusal aşırı yükü önleyen sakin arayüz.
           </Text>
         </TouchableOpacity>
 
-        {/* 4. STANDART GÖRÜNÜM */}
+        {/* 4. FİZİKSEL / MOTOR BECERİ DESTEĞİ (EL TİTREMESİ, PARKINSON) */}
+        <TouchableOpacity
+          onPress={() => handleChooseMode(MODES.MOTOR)}
+          style={[styles.card, styles.cardMotor]}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel="Fiziksel ve Motor Beceri Desteği. Devasa dokunmatik hedefler ve hata toleransı."
+        >
+          <View style={styles.cardHeader}>
+            <View style={[styles.iconPill, { backgroundColor: '#7C3AED' }]}>
+              <HandMetal size={24} color="#FFFFFF" />
+            </View>
+            <ArrowRight size={20} color="#7C3AED" />
+          </View>
+          <Text style={[styles.cardTitle, { color: '#6D28D9' }]}>
+            Fiziksel & Motor Beceri Desteği
+          </Text>
+          <Text style={[styles.cardDescription, { color: '#4C1D95' }]}>
+            El titremesi veya kısıtlı hareket kabiliyeti olan bireyler için genişletilmiş dev dokunmatik hedefler (min 56px) ve hata toleranslı arayüz.
+          </Text>
+        </TouchableOpacity>
+
+        {/* 5. STANDART GÖRÜNÜM */}
         <TouchableOpacity
           onPress={() => handleChooseMode(MODES.STANDARD)}
           style={[styles.card, styles.cardStandard]}
@@ -116,7 +138,7 @@ export const OnboardingScreen = ({ onComplete }) => {
             Standart Görünüm
           </Text>
           <Text style={[styles.cardDescription, { color: '#64748B' }]}>
-            Varsayılan modern NSosyal akışı. Dilediğiniz an ayarlardan erişilebilirlik modunu değiştirebilirsiniz.
+            Varsayılan modern NSosyal akışı. Dilediğiniz zaman ayarlardan modu değiştirebilirsiniz.
           </Text>
         </TouchableOpacity>
       </View>
@@ -163,7 +185,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 16,
     borderWidth: 2,
-    minHeight: 110,
+    minHeight: 105,
   },
   cardVisual: {
     backgroundColor: '#000000',
@@ -176,6 +198,10 @@ const styles = StyleSheet.create({
   cardNeuro: {
     backgroundColor: '#F0FDFA',
     borderColor: '#14B8A6',
+  },
+  cardMotor: {
+    backgroundColor: '#FAF5FF',
+    borderColor: '#C084FC',
   },
   cardStandard: {
     backgroundColor: '#FFFFFF',

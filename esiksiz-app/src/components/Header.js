@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useAccessibility, MODES } from '../context/AccessibilityContext';
-import { Eye, Volume2, Sparkles, Sliders } from 'lucide-react-native';
+import { Eye, Ear, Sparkles, Sliders, HandMetal } from 'lucide-react-native';
 
 export const Header = ({ onOpenAccessibility }) => {
   const { theme, currentMode } = useAccessibility();
@@ -13,9 +13,11 @@ export const Header = ({ onOpenAccessibility }) => {
       case MODES.VISUAL:
         return { label: 'Görme Modu', icon: Eye, color: '#FFE600', textColor: '#000000' };
       case MODES.HEARING:
-        return { label: 'İşitme Modu', icon: Volume2, color: '#E0F2FE', textColor: '#0284C7' };
+        return { label: 'İşitme & TİD', icon: Ear, color: '#E0F2FE', textColor: '#0284C7' };
       case MODES.NEURO:
         return { label: 'Sakin Mod', icon: Sparkles, color: '#CCFBF1', textColor: '#0F766E' };
+      case MODES.MOTOR:
+        return { label: 'Motor Modu', icon: HandMetal, color: '#F3E8FF', textColor: '#7C3AED' };
       default:
         return { label: 'Erişilebilirlik', icon: Sliders, color: colors.inputBg, textColor: colors.text };
     }
@@ -36,11 +38,11 @@ export const Header = ({ onOpenAccessibility }) => {
       ]}
       accessible={true}
       accessibilityRole="header"
-      accessibilityLabel="NSosyal Ana Başlık Alanı"
+      accessibilityLabel="NSosyal Başlık Alanı"
     >
       {/* NSosyal Logosu */}
       <View style={styles.logoRow}>
-        <Text style={[styles.logoText, { color: isVisual ? '#FFE600' : '#2563EB' }]}>
+        <Text style={[styles.logoText, { color: isVisual ? '#FFE600' : colors.primary }]}>
           N<Text style={{ color: isVisual ? '#FFFFFF' : '#0F172A' }}>Sosyal</Text>
         </Text>
       </View>

@@ -2,15 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { useAccessibility } from '../context/AccessibilityContext';
 import { SpeechService } from '../services/speechService';
-import { Volume2, VolumeX, Heart, MessageCircle, Share2, Sparkles, Play, Pause, Bookmark, Ear, Music, Volume1 } from 'lucide-react-native';
+import { Volume2, VolumeX, Heart, MessageCircle, Share2, Sparkles, Play, Pause, Bookmark, Ear, Music, UserCheck } from 'lucide-react-native';
 
 export const FeedCard = ({ post }) => {
-  const { theme, fontSizeScale, bionicReading } = useAccessibility();
+  const { theme, fontSizeScale, bionicReading, tidActive, focusRulerActive } = useAccessibility();
   const colors = theme.colors;
 
   const isVisual = theme.isVisual;
   const isHearing = theme.isHearing;
   const isNeuro = theme.isNeuro;
+  const isMotor = theme.isMotor;
 
   const [isReadingPost, setIsReadingPost] = useState(false);
   const [isPlayingVideo, setIsPlayingVideo] = useState(false);
@@ -30,7 +31,7 @@ export const FeedCard = ({ post }) => {
     return () => clearInterval(timer);
   }, [isPlayingVideo, post.captions]);
 
-  // GÖRME ENGELLİ KULLANICI İÇİN: Karta dokununca hem yazıyı hem görseli sırayla sesli okuma!
+  // GÖRME ENGELLİ KULLANICI İÇİN: Karta dokununca hem yazıyı hem görseli seslendirme!
   const handleToggleReadPostAndImage = () => {
     if (isReadingPost) {
       SpeechService.stop();
@@ -41,7 +42,7 @@ export const FeedCard = ({ post }) => {
       if (post.image && post.aiDescription) {
         fullSpeech += `Paylaşılan görselin betimlemesi: ${post.aiDescription}`;
       } else if (post.videoUrl) {
-        fullSpeech += `Paylaşılan videonun betimlemesi: ${post.aiDescription || 'Videoda klavyede kod yazan eller yakın plandan gösteriliyor.'}`;
+        fullSpeech += `Paylaşılan videonun betimlemesi: ${post.aiDescription || 'Videoda klavyede hızlıca kod yazan eller yakın plandan gösteriliyor.'}`;
       }
 
       SpeechService.speak(
@@ -53,7 +54,7 @@ export const FeedCard = ({ post }) => {
     }
   };
 
-  // Bionic Reading Metin Formatı
+  // Bionic Reading Metin Formatı (DEHB ve Hızlı Odaklanma)
   const renderFormattedText = (text) => {
     if (!bionicReading) return text;
     const words = text.split(' ');
@@ -76,16 +77,15 @@ export const FeedCard = ({ post }) => {
         styles.card,
         {
           backgroundColor: colors.cardBackground,
-          borderColor: isVisual ? '#FFE600' : isHearing ? '#0284C7' : colors.cardBorder,
-          borderWidth: isVisual ? 2.5 : isHearing ? 2 : 1,
+          borderColor: isVisual ? '#FFE600' : isHearing ? '#0284C7' : isMotor ? '#7C3AED' : colors.cardBorder,
+          borderWidth: isVisual ? 2.5 : isHearing || isMotor ? 2 : 1,
         },
       ]}
       accessible={true}
       accessibilityRole="article"
       accessibilityLabel={`${post.author.name} gönderisi: ${post.content}`}
-      accessibilityHint={isVisual ? "Bu gönderiyi ve görsel açıklamasını baştan sona sesli dinlemek için dokunun." : undefined}
     >
-      {/* GÖRME MODUNDA TÜM KARTIN EN TEPESİNDE SESLİ REHBER VE DOKUNMA BANTİ */}
+      {/* 1. GÖRME MODUNDA: KARTIN EN ÜSTÜNDE DEVA SA SESLİ DİNLEME BANNERI */}
       {isVisual && (
         <TouchableOpacity
           onPress={handleToggleReadPostAndImage}
@@ -104,12 +104,12 @@ export const FeedCard = ({ post }) => {
             <Volume2 size={20} color="#000000" />
           )}
           <Text style={[styles.voiceBannerText, { color: isReadingPost ? '#FFFFFF' : '#000000' }]}>
-            {isReadingPost ? 'Okuma Sürüyor (Durdurmak İçin Dokunun) ⏹️' : '🔊 Dinlemek İçin Karta Dokunun'}
+            {isReadingPost ? 'Okuma Sürüyor (Durdurmak İçin Dokunun) ⏹️' : '🔊 Gönderiyi ve Görseli Dinlemek İçin Dokunun'}
           </Text>
         </TouchableOpacity>
       )}
 
-      {/* KART GÖVDESİ - GÖRME MODUNDA KARTIN HERHANGİ BİR YERİNE DOKUNULDUĞUNDA DA SESLENDİRİR! */}
+      {/* KART GÖVDESİ - Görme modunda herhangi bir yere dokunulunca da okur */}
       <TouchableOpacity
         onPress={isVisual ? handleToggleReadPostAndImage : undefined}
         activeOpacity={isVisual ? 0.85 : 1}
@@ -121,8 +121,11 @@ export const FeedCard = ({ post }) => {
             style={[
               styles.avatar,
               {
-                borderColor: isVisual ? '#FFE600' : colors.border,
-                borderWidth: isVisual ? 2 : 1,
+                borderColor: isVisual ? '#FFE600' : isMotor ? '#7C3AED' : colors.border,
+                borderWidth: isVisual || isMotor ? 2 : 1,
+                width: isMotor ? 50 : 44,
+                height: isMotor ? 50 : 44,
+                borderRadius: isMotor ? 25 : 22,
               },
             ]}
           />
@@ -135,23 +138,37 @@ export const FeedCard = ({ post }) => {
             </Text>
           </View>
 
-          {/* Görme Modunda Değilken Standart Sesli Dinleme İkonu */}
+          {/* Standart Modda Küçük Ses İkonu */}
           {!isVisual && (
             <TouchableOpacity
               onPress={handleToggleReadPostAndImage}
-              style={[styles.smallListenBtn, { backgroundColor: colors.inputBg }]}
+              style={[
+                styles.smallListenBtn,
+                {
+                  backgroundColor: colors.inputBg,
+                  width: isMotor ? 48 : 36,
+                  height: isMotor ? 48 : 36,
+                },
+              ]}
               accessible={true}
               accessibilityRole="button"
-              accessibilityLabel="Gönderiyi sesli dinle"
+              accessibilityLabel="Sesli dinle"
             >
               {isReadingPost ? (
-                <VolumeX size={16} color="#DC2626" />
+                <VolumeX size={18} color="#DC2626" />
               ) : (
-                <Volume2 size={16} color={colors.primary} />
+                <Volume2 size={18} color={colors.primary} />
               )}
             </TouchableOpacity>
           )}
         </View>
+
+        {/* Nörogelişimsel Okuma Cetveli (Focus Ruler) Vurgusu */}
+        {focusRulerActive && (
+          <View style={styles.focusRulerBar}>
+            <Text style={styles.focusRulerText}>🔎 Odaklı Okuma Alanı</Text>
+          </View>
+        )}
 
         {/* Gönderi Metni (Yazı) */}
         <Text
@@ -207,6 +224,21 @@ export const FeedCard = ({ post }) => {
               )}
             </TouchableOpacity>
 
+            {/* SAĞIR KULLANICILAR İÇİN: TÜRK İŞARET DİLİ (TİD) TERCÜMAN KUTUSU */}
+            {isHearing && (
+              <View style={styles.tidOverlay}>
+                <View style={styles.tidHeader}>
+                  <UserCheck size={12} color="#FFFFFF" />
+                  <Text style={styles.tidLabel}>🤟 TİD Çevirmeni</Text>
+                </View>
+                <Image
+                  source={{ uri: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80' }}
+                  style={styles.tidAvatar}
+                />
+                <Text style={styles.tidActiveText}>Canlı Aktarım</Text>
+              </View>
+            )}
+
             {/* Video Üzeri Canlı Altyazı */}
             <View style={styles.videoSubtitleBar}>
               <Text style={[styles.videoSubtitleText, { color: isVisual ? '#FFE600' : '#FFFFFF' }]}>
@@ -216,13 +248,13 @@ export const FeedCard = ({ post }) => {
           </View>
         )}
 
-        {/* İŞİTME ENGELLİ (SAĞIR) KULLANICI İÇİN: DUYULAMAYAN ÇEVRESEL SESLERİN BETİMLEMESİ */}
+        {/* İŞİTME ENGELLİ (SAĞIR) İÇİN: DUYULAMAYAN ÇEVRESEL SESLERİN BETİMLEMESİ */}
         {isHearing && post.soundDescriptions && (
           <View style={styles.soundDescriptionContainer}>
             <View style={styles.soundHeaderRow}>
               <Ear size={16} color="#0284C7" />
               <Text style={styles.soundHeaderTitle}>
-                Duyulamayan Seslerin ve Ortamın Betimlemesi:
+                Duyulamayan Çevresel Seslerin & Müziğin Betimlemesi:
               </Text>
             </View>
             <View style={styles.soundList}>
@@ -236,13 +268,14 @@ export const FeedCard = ({ post }) => {
         )}
       </TouchableOpacity>
 
-      {/* Alt Etkileşim Butonları */}
+      {/* Alt Etkileşim Butonları (Motor Engelliler İçin Devasa Dokunma Alanları) */}
       <View
         style={[
           styles.actionsRow,
           {
             borderTopColor: colors.border,
-            borderTopWidth: isVisual ? 2 : 1,
+            borderTopWidth: isVisual || isMotor ? 2 : 1,
+            paddingVertical: isMotor ? 14 : 10,
           },
         ]}
       >
@@ -252,41 +285,45 @@ export const FeedCard = ({ post }) => {
               setLiked(!liked);
               setLikeCount(liked ? likeCount - 1 : likeCount + 1);
             }}
-            style={[styles.actionBtn, { minHeight: isVisual ? 48 : 40 }]}
+            style={[styles.actionBtn, { minHeight: isMotor ? 54 : isVisual ? 48 : 40, minWidth: isMotor ? 54 : 44 }]}
           >
             <Heart
-              size={20}
-              color={liked ? '#EF4444' : isVisual ? '#FFE600' : colors.textMuted}
+              size={isMotor ? 24 : 20}
+              color={liked ? '#EF4444' : isVisual ? '#FFE600' : isMotor ? '#7C3AED' : colors.textMuted}
               fill={liked ? '#EF4444' : 'none'}
             />
             {!theme.hideClutter && (
-              <Text style={[styles.actionCount, { color: colors.text, fontSize: 13 * fontSizeScale }]}>
+              <Text style={[styles.actionCount, { color: colors.text, fontSize: (isMotor ? 14 : 13) * fontSizeScale }]}>
                 {likeCount}
               </Text>
             )}
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.actionBtn, { minHeight: isVisual ? 48 : 40 }]}>
-            <MessageCircle size={20} color={isVisual ? '#FFE600' : colors.textMuted} />
+          <TouchableOpacity
+            style={[styles.actionBtn, { minHeight: isMotor ? 54 : isVisual ? 48 : 40, minWidth: isMotor ? 54 : 44 }]}
+          >
+            <MessageCircle size={isMotor ? 24 : 20} color={isVisual ? '#FFE600' : isMotor ? '#7C3AED' : colors.textMuted} />
             {!theme.hideClutter && (
-              <Text style={[styles.actionCount, { color: colors.text, fontSize: 13 * fontSizeScale }]}>
+              <Text style={[styles.actionCount, { color: colors.text, fontSize: (isMotor ? 14 : 13) * fontSizeScale }]}>
                 {post.comments}
               </Text>
             )}
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.actionBtn, { minHeight: isVisual ? 48 : 40 }]}>
-            <Share2 size={20} color={isVisual ? '#FFE600' : colors.textMuted} />
+          <TouchableOpacity
+            style={[styles.actionBtn, { minHeight: isMotor ? 54 : isVisual ? 48 : 40, minWidth: isMotor ? 54 : 44 }]}
+          >
+            <Share2 size={isMotor ? 24 : 20} color={isVisual ? '#FFE600' : isMotor ? '#7C3AED' : colors.textMuted} />
           </TouchableOpacity>
         </View>
 
         <TouchableOpacity
           onPress={() => setSaved(!saved)}
-          style={[styles.actionBtn, { minHeight: isVisual ? 48 : 40 }]}
+          style={[styles.actionBtn, { minHeight: isMotor ? 54 : isVisual ? 48 : 40, minWidth: isMotor ? 54 : 44 }]}
         >
           <Bookmark
-            size={20}
-            color={saved ? colors.primary : isVisual ? '#FFE600' : colors.textMuted}
+            size={isMotor ? 24 : 20}
+            color={saved ? colors.primary : isVisual ? '#FFE600' : isMotor ? '#7C3AED' : colors.textMuted}
             fill={saved ? colors.primary : 'none'}
           />
         </TouchableOpacity>
@@ -309,7 +346,7 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    minHeight: 50,
+    minHeight: 52,
   },
   voiceBannerText: {
     fontSize: 14,
@@ -322,9 +359,6 @@ const styles = StyleSheet.create({
     padding: 14,
   },
   avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
     marginRight: 10,
   },
   authorInfo: {
@@ -337,11 +371,22 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   smallListenBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  focusRulerBar: {
+    backgroundColor: '#CCFBF1',
+    paddingHorizontal: 12,
+    paddingVertical: 3,
+    marginBottom: 6,
+    borderLeftWidth: 4,
+    borderLeftColor: '#0D9488',
+  },
+  focusRulerText: {
+    color: '#0F766E',
+    fontSize: 10,
+    fontWeight: '800',
   },
   postText: {
     paddingHorizontal: 14,
@@ -381,12 +426,46 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: '38%',
     left: '42%',
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 4,
+  },
+  tidOverlay: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(2, 132, 199, 0.95)',
+    borderRadius: 10,
+    padding: 6,
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+  },
+  tidHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 4,
+  },
+  tidLabel: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '800',
+  },
+  tidAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 8,
+    resizeMode: 'cover',
+  },
+  tidActiveText: {
+    color: '#BAE6FD',
+    fontSize: 8,
+    fontWeight: '700',
+    marginTop: 2,
   },
   videoSubtitleBar: {
     backgroundColor: 'rgba(0, 0, 0, 0.88)',
@@ -431,7 +510,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 14,
-    paddingVertical: 10,
   },
   leftActions: {
     flexDirection: 'row',
@@ -441,10 +519,10 @@ const styles = StyleSheet.create({
   actionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    minWidth: 44,
+    gap: 6,
+    justifyContent: 'center',
   },
   actionCount: {
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });

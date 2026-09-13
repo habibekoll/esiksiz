@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { useAccessibility, MODES } from '../context/AccessibilityContext';
-import { Eye, Ear, Sparkles, LayoutGrid, Check, ArrowLeft, RefreshCcw } from 'lucide-react-native';
+import { Eye, Ear, Sparkles, LayoutGrid, Check, ArrowLeft, RefreshCcw, HandMetal } from 'lucide-react-native';
 
 export const AccessibilitySettingsScreen = ({ onBack, onResetToOnboarding }) => {
   const {
@@ -19,20 +19,26 @@ export const AccessibilitySettingsScreen = ({ onBack, onResetToOnboarding }) => 
     {
       id: MODES.VISUAL,
       title: 'Görme Desteği (Sesli Okuma & Betimleme)',
-      desc: 'Hem paylaşılan yazıyı hem de görseli sesli dinleme imkânı, 16:1 kontrastlı sarı-siyah zemin.',
+      desc: 'Tüm karta dokunarak hem yazıyı hem görseli dinleme, 16:1 kontrastlı sarı-siyah zemin.',
       icon: Eye,
     },
     {
       id: MODES.HEARING,
-      title: 'İşitme Desteği (Ses & Ortam Betimlemesi)',
-      desc: 'Duyulamayan çevresel seslerin (müzik, alkış, efektler) detaylı metin betimlemesi ve altyazı.',
+      title: 'İşitme Desteği (Ses Betimlemesi & TİD)',
+      desc: 'Duyulamayan çevresel seslerin (müzik, alkış) detaylı metin betimlemesi ve Türk İşaret Dili.',
       icon: Ear,
     },
     {
       id: MODES.NEURO,
       title: 'Nörogelişimsel Sakin Mod (DEHB / Otizm)',
-      desc: 'Bionic Reading ile hızlı odaklanma, sıfır animasyon ve sadeleştirilmiş sakin akış.',
+      desc: 'Bionic Reading, odak cetveli, sıfır animasyon ve sakinleştirilmiş akış.',
       icon: Sparkles,
+    },
+    {
+      id: MODES.MOTOR,
+      title: 'Fiziksel & Motor Beceri Desteği',
+      desc: 'El titremesi ve motor kısıtlar için devasa dokunma alanları (min 56px) ve hata toleransı.',
+      icon: HandMetal,
     },
     {
       id: MODES.STANDARD,
@@ -98,7 +104,7 @@ export const AccessibilitySettingsScreen = ({ onBack, onResetToOnboarding }) => 
                 accessible={true}
                 accessibilityRole="radio"
                 accessibilityState={{ selected: isSelected }}
-                accessibilityLabel={`${item.title}. ${item.desc}. ${isSelected ? 'Aktif mod.' : 'Geçmek için tıklayın.'}`}
+                accessibilityLabel={`${item.title}. ${item.desc}. ${isSelected ? 'Aktif mod.' : 'Geçmek için dokunun.'}`}
               >
                 <View
                   style={[
