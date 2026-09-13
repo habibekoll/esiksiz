@@ -1,36 +1,42 @@
 import React from 'react';
 import { View, Text, Modal, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { useAccessibility, MODES } from '../context/AccessibilityContext';
-import { Eye, Volume2, Sparkles, LayoutGrid, X, CheckCircle2, Zap } from 'lucide-react-native';
+import { Eye, Volume2, Sparkles, LayoutGrid, X, CheckCircle2, Zap, HandMetal, Smartphone, Vibrate } from 'lucide-react-native';
 
 export const SettingsModal = ({ visible, onClose, onSimulateStruggle, onSimulateSensory, onSimulateHearing }) => {
-  const { currentMode, setMode, theme, fontSizeScale, setFontSizeScale } = useAccessibility();
+  const { currentMode, selectMode, theme, fontSizeScale, setFontSizeScale } = useAccessibility();
   const colors = theme.colors;
 
   const modeOptions = [
     {
       id: MODES.STANDARD,
       title: 'Standart NSosyal Modu',
-      desc: 'Platformun varsayılan görünümü ve akışı.',
+      desc: 'Platformun varsayılan zengin içerik akışı ve tasarımı.',
       icon: LayoutGrid,
     },
     {
       id: MODES.VISUAL,
       title: 'Görme Engelli / Az Gören Modu',
-      desc: 'Saf siyah arkaplan, yüksek kontrast sarı vurgular (16:1), büyük butonlar ve sesli görsel betimleme.',
+      desc: '16.1:1 rekor kontrast (saf siyah & 555nm sarı), karta dokunarak sesli dinleme ve Akıllı Sesli Galeri.',
       icon: Eye,
     },
     {
       id: MODES.HEARING,
       title: 'İşitme Engelli Modu',
-      desc: 'Videolarda otomatik senkronize altyazı ve görsel uyarı darbesi.',
+      desc: 'Videolarda canlı altyazı, Türk İşaret Dili (TİD) avatarı ve duyulmayan çevresel ses betimlemeleri ([Alkış], [Müzik]).',
       icon: Volume2,
     },
     {
       id: MODES.NEURO,
       title: 'Nörogelişimsel Sakin Mod (DEHB / Otizm)',
-      desc: 'Dikkat dağıtıcı animasyonlar kapalı, pastel renkler ve bilişsel yükü azaltan sade arayüz.',
+      desc: 'Biyonik Okuma (Bionic Reading), imleci takip eden Odak Cetveli ve duyusal sakinlik.',
       icon: Sparkles,
+    },
+    {
+      id: MODES.MOTOR,
+      title: 'Fiziksel & Motor Beceri Desteği',
+      desc: 'Titreyen ve kas kısıtı olan eller için 56px dev dokunma hedefleri ve yüksek tıklama toleransı.',
+      icon: HandMetal,
     },
   ];
 
@@ -71,7 +77,7 @@ export const SettingsModal = ({ visible, onClose, onSimulateStruggle, onSimulate
 
           <ScrollView style={styles.scrollArea}>
             <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>
-              ERİŞİLEBİLİRLİK MODU SEÇİN
+              ERİŞİLEBİLİRLİK MODU SEÇİN (5 PROFİL)
             </Text>
 
             {modeOptions.map((opt) => {
@@ -80,7 +86,7 @@ export const SettingsModal = ({ visible, onClose, onSimulateStruggle, onSimulate
               return (
                 <TouchableOpacity
                   key={opt.id}
-                  onPress={() => setMode(opt.id)}
+                  onPress={() => selectMode(opt.id)}
                   style={[
                     styles.modeCard,
                     {
@@ -132,51 +138,7 @@ export const SettingsModal = ({ visible, onClose, onSimulateStruggle, onSimulate
               );
             })}
 
-            {/* Yazı Boyutu Ölçekleyici (Dynamic Type) */}
-            <View style={styles.section}>
-              <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>
-                YAZI TİPİ BOYUTU (DYNAMIC TYPE)
-              </Text>
-              <View style={styles.fontScaleRow}>
-                {[1.0, 1.2, 1.4].map((scale) => (
-                  <TouchableOpacity
-                    key={scale}
-                    onPress={() => setFontSizeScale(scale)}
-                    style={[
-                      styles.fontScaleBtn,
-                      {
-                        backgroundColor:
-                          fontSizeScale === scale
-                            ? theme.isHighContrast
-                              ? '#FFE600'
-                              : colors.primary
-                            : colors.inputBg,
-                      },
-                    ]}
-                    accessible={true}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Yazı boyutu ${Math.round(scale * 100)} yüzde`}
-                  >
-                    <Text
-                      style={{
-                        fontSize: 14 * scale,
-                        fontWeight: '700',
-                        color:
-                          fontSizeScale === scale
-                            ? theme.isHighContrast
-                              ? '#000000'
-                              : '#FFFFFF'
-                            : colors.text,
-                      }}
-                    >
-                      %{Math.round(scale * 100)}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-
-            {/* Jüri Canlı Demo Bölümü: Öneri Motoru Simülatörü */}
+            {/* Jüri Canlı Demo Bölümü: Öneri Motoru & Akıllı Algılama Simülatörü */}
             <View
               style={[
                 styles.demoBox,
@@ -188,48 +150,68 @@ export const SettingsModal = ({ visible, onClose, onSimulateStruggle, onSimulate
             >
               <View style={styles.demoHeader}>
                 <Zap size={18} color="#22C55E" />
-                <Text style={styles.demoTitle}>Jüri Canlı Demo: Uyarlanabilir Motoru Tetikle</Text>
+                <Text style={styles.demoTitle}>Jüri Canlı Demo: Akıllı Tetikleyiciler</Text>
               </View>
               <Text style={styles.demoDesc}>
-                Kullanıcının zorlanma davranışını simüle ederek jüriye proaktif bildirim akışını canlı gösterin:
+                Jüriye sıfır tıklama ile ekran okuyucu algılamayı, cihaz sallamayı ve zorlanma adaptasyonunu canlı gösterin:
               </Text>
 
               <View style={styles.demoButtons}>
+                {/* 1. Ekran Okuyucu Algılama Simülatörü */}
+                <TouchableOpacity
+                  onPress={() => {
+                    onClose();
+                    selectMode(MODES.VISUAL, 'screen_reader');
+                  }}
+                  style={[styles.demoActionBtn, { backgroundColor: '#1E293B' }]}
+                >
+                  <Text style={[styles.demoActionText, { color: '#FFE600' }]}>
+                    📱 TalkBack / VoiceOver Algılama Simülasyonu
+                  </Text>
+                </TouchableOpacity>
+
+                {/* 2. Cihazı Salla Simülatörü */}
+                <TouchableOpacity
+                  onPress={() => {
+                    onClose();
+                    selectMode(MODES.VISUAL, 'shake');
+                  }}
+                  style={[styles.demoActionBtn, { backgroundColor: '#1E293B' }]}
+                >
+                  <Text style={[styles.demoActionText, { color: '#38BDF8' }]}>
+                    📳 Cihazı Salla (Shake) Simülasyonu
+                  </Text>
+                </TouchableOpacity>
+
+                {/* 3. Görme Zorlanması Simülasyonu */}
                 <TouchableOpacity
                   onPress={() => {
                     onClose();
                     onSimulateStruggle();
                   }}
                   style={styles.demoActionBtn}
-                  accessible={true}
-                  accessibilityRole="button"
-                  accessibilityLabel="Görme Güçlüğü Davranış Simülasyonu"
                 >
-                  <Text style={styles.demoActionText}>👀 Görme Güçlüğü Simülasyonu</Text>
+                  <Text style={styles.demoActionText}>👀 Görme Güçlüğü Davranış Simülasyonu</Text>
                 </TouchableOpacity>
 
+                {/* 4. Duyusal Yük Simülasyonu */}
                 <TouchableOpacity
                   onPress={() => {
                     onClose();
                     onSimulateSensory();
                   }}
                   style={styles.demoActionBtn}
-                  accessible={true}
-                  accessibilityRole="button"
-                  accessibilityLabel="Duyusal Yük Davranış Simülasyonu"
                 >
-                  <Text style={styles.demoActionText}>🧠 Duyusal Yük Simülasyonu</Text>
+                  <Text style={styles.demoActionText}>🧠 Duyusal Yük (DEHB) Simülasyonu</Text>
                 </TouchableOpacity>
 
+                {/* 5. İşitme İhtiyacı Simülasyonu */}
                 <TouchableOpacity
                   onPress={() => {
                     onClose();
                     onSimulateHearing();
                   }}
                   style={styles.demoActionBtn}
-                  accessible={true}
-                  accessibilityRole="button"
-                  accessibilityLabel="İşitme İhtiyacı Davranış Simülasyonu"
                 >
                   <Text style={styles.demoActionText}>🧏 İşitme İhtiyacı Simülasyonu</Text>
                 </TouchableOpacity>
@@ -251,42 +233,43 @@ const styles = StyleSheet.create({
   container: {
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 36,
     maxHeight: '85%',
-    paddingBottom: 24,
   },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 18,
+    paddingBottom: 14,
     borderBottomWidth: 1,
+    marginBottom: 14,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '800',
   },
   closeButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
   },
   scrollArea: {
-    padding: 16,
+    marginBottom: 10,
   },
   sectionLabel: {
     fontSize: 12,
     fontWeight: '800',
     letterSpacing: 0.5,
     marginBottom: 10,
-    marginTop: 6,
   },
   modeCard: {
     padding: 14,
-    borderRadius: 12,
+    borderRadius: 14,
     marginBottom: 10,
-    minHeight: 64,
   },
   modeCardTop: {
     flexDirection: 'row',
@@ -301,31 +284,17 @@ const styles = StyleSheet.create({
   },
   modeCardTitle: {
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   modeCardDesc: {
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  section: {
-    marginVertical: 14,
-  },
-  fontScaleRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  fontScaleBtn: {
-    flex: 1,
-    height: 44, // WCAG AA dokunma alanı
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
+    fontSize: 12,
+    lineHeight: 17,
   },
   demoBox: {
-    marginTop: 14,
     padding: 14,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1.5,
+    marginTop: 10,
     marginBottom: 20,
   },
   demoHeader: {
@@ -337,29 +306,28 @@ const styles = StyleSheet.create({
   demoTitle: {
     fontSize: 14,
     fontWeight: '800',
-    color: '#16A34A',
+    color: '#15803D',
   },
   demoDesc: {
     fontSize: 12,
     color: '#4B5563',
     marginBottom: 10,
+    lineHeight: 16,
   },
   demoButtons: {
     gap: 8,
   },
   demoActionBtn: {
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#22C55E',
     paddingVertical: 10,
     paddingHorizontal: 12,
-    borderRadius: 8,
-    minHeight: 44,
-    justifyContent: 'center',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   demoActionText: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#15803D',
+    color: '#0F172A',
   },
 });

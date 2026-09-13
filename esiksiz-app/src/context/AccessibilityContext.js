@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { AccessibilityInfo, Platform } from 'react-native';
 import { SpeechService } from '../services/speechService';
 
 const AccessibilityContext = createContext();
@@ -23,7 +24,7 @@ export const AccessibilityProvider = ({ children }) => {
   const [pendingSuggestion, setPendingSuggestion] = useState(null);
 
   // Mod Seçildiğinde Uygulamanın Halini ve Kurallarını Belirle
-  const selectMode = (mode) => {
+  const selectMode = (mode, reason) => {
     setCurrentMode(mode);
 
     if (mode === MODES.VISUAL) {
@@ -36,9 +37,12 @@ export const AccessibilityProvider = ({ children }) => {
 
       // Görme Engelli Birey İçin Sesli Rehber Karşılama
       setTimeout(() => {
-        SpeechService.speak(
-          'Görme desteği modu devrede. 16:1 rekor kontrast sağlandı. Ekrandaki herhangi bir gönderiye dokunarak hem yazıyı hem yapay zekâ görsel açıklamasını dinleyebilirsiniz.'
-        );
+        const welcomeMsg = reason === 'screen_reader'
+          ? 'Ekran okuyucu sisteminiz algılandı. Görme desteği modu sıfır tıklama ile otomatik başlatıldı. 16:1 kontrast devrede. Karta dokunarak yazıyı ve görsel betimlemesini dinleyebilirsiniz.'
+          : reason === 'shake'
+          ? 'Cihaz sallama jesti algılandı. Görme desteği modu devreye alındı. Karta dokunarak gönderiyi dinleyebilirsiniz.'
+          : 'Görme desteği modu devrede. 16:1 rekor kontrast sağlandı. Ekrandaki herhangi bir gönderiye dokunarak hem yazıyı hem yapay zekâ görsel açıklamasını dinleyebilirsiniz.';
+        SpeechService.speak(welcomeMsg);
       }, 350);
     } else if (mode === MODES.HEARING) {
       setFontSizeScale(1.05);
@@ -70,6 +74,55 @@ export const AccessibilityProvider = ({ children }) => {
       setFocusRulerActive(false);
     }
   };
+
+  // 1. KADEME: İŞLETİM SİSTEMİ EKRAN OKUYUCU (TALKBACK / VOICEOVER) OTOMATİK ALGILAMA
+  useEffect(() => {
+    if (AccessibilityInfo && AccessibilityInfo.isScreenReaderEnabled) {
+      AccessibilityInfo.isScreenReaderEnabled()
+        .then((isEnabled) => {
+          if (isEnabled && currentMode === null) {
+            selectMode(MODES.VISUAL, 'screen_reader');
+          }
+        })
+        .catch(() => {});
+
+      const sub = AccessibilityInfo.addEventListener('screenReaderChanged', (isEnabled) => {
+        if (isEnabled) {
+          selectMode(MODES.VISUAL, 'screen_reader');
+        }
+      });
+
+      return () => {
+        if (sub && sub.remove) sub.remove();
+      };
+    }
+  }, []);
+
+  // 3. KADEME: CİHAZI SALLAMA (SHAKE TO TOGGLE) JEST ALGILAMA
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined' && 'DeviceMotionEvent' in window) {
+      let lastX = 0, lastY = 0, lastZ = 0;
+      let lastTime = 0;
+      const handleMotion = (event) => {
+        const cur = event.accelerationIncludingGravity;
+        if (!cur) return;
+        const now = Date.now();
+        if (now - lastTime > 120) {
+          const diff = now - lastTime;
+          lastTime = now;
+          const speed = Math.abs(cur.x + cur.y + cur.z - lastX - lastY - lastZ) / diff * 10000;
+          if (speed > 850 && currentMode !== MODES.VISUAL) {
+            selectMode(MODES.VISUAL, 'shake');
+          }
+          lastX = cur.x || 0;
+          lastY = cur.y || 0;
+          lastZ = cur.z || 0;
+        }
+      };
+      window.addEventListener('devicemotion', handleMotion);
+      return () => window.removeEventListener('devicemotion', handleMotion);
+    }
+  }, [currentMode]);
 
   const isVisual = currentMode === MODES.VISUAL;
   const isHearing = currentMode === MODES.HEARING;
@@ -150,7 +203,7 @@ export const AccessibilityProvider = ({ children }) => {
     <AccessibilityContext.Provider
       value={{
         currentMode,
-        setMode: selectMode,
+        setMode: (m) => selectMode(m),
         selectMode,
         theme,
         fontSizeScale,
