@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, View, SafeAreaView, Platform, StatusBar, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, SafeAreaView, Platform, StatusBar, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { AccessibilityProvider, useAccessibility, MODES } from './src/context/AccessibilityContext';
 import { Header } from './src/components/Header';
 import { BottomNavBar } from './src/components/BottomNavBar';
@@ -10,7 +10,7 @@ import { AccessibilitySettingsScreen } from './src/screens/AccessibilitySettings
 import { AdaptiveEngine } from './src/engine/AdaptiveEngine';
 import { SpeechService } from './src/services/speechService';
 import { INITIAL_POSTS } from './src/services/aiCaptionService';
-import { Compass, Bell, Wifi, BatteryCharging, Sparkles } from 'lucide-react-native';
+import { Compass, Bell, Wifi, Sparkles, Eye, Ear, HandMetal, LayoutGrid, RotateCcw } from 'lucide-react-native';
 
 function ExplorePlaceholderScreen() {
   const { theme } = useAccessibility();
@@ -42,9 +42,88 @@ function NotificationsPlaceholderScreen() {
   );
 }
 
+// Jüri Canlı Sunumu İçin Hızlı Mod Değiştirme Çubuğu
+function LiveModeBar({ onOpenOnboarding }) {
+  const { currentMode, selectMode, theme } = useAccessibility();
+  const isVisual = theme.isVisual;
+
+  const modes = [
+    { id: MODES.VISUAL, label: '🟡 Görme (16:1)', icon: Eye },
+    { id: MODES.HEARING, label: '🤟 İşitme & TİD', icon: Ear },
+    { id: MODES.NEURO, label: '🧠 DEHB & Odak', icon: Sparkles },
+    { id: MODES.MOTOR, label: '✋ Motor', icon: HandMetal },
+    { id: MODES.STANDARD, label: '🌐 Standart', icon: LayoutGrid },
+  ];
+
+  return (
+    <View style={[styles.liveModeContainer, { backgroundColor: isVisual ? '#0A0A0A' : '#F1F5F9', borderBottomColor: isVisual ? '#FFE600' : '#E2E8F0' }]}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.liveModeScroll}>
+        {modes.map((m) => {
+          const isCurrent = currentMode === m.id;
+          return (
+            <TouchableOpacity
+              key={m.id}
+              onPress={() => selectMode(m.id)}
+              style={[
+                styles.liveModeBtn,
+                {
+                  backgroundColor: isCurrent
+                    ? isVisual
+                      ? '#FFE600'
+                      : '#2563EB'
+                    : isVisual
+                    ? '#171717'
+                    : '#FFFFFF',
+                  borderColor: isCurrent ? (isVisual ? '#FFE600' : '#2563EB') : (isVisual ? '#333333' : '#CBD5E1'),
+                },
+              ]}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={`${m.label} moduna geç`}
+            >
+              <Text
+                style={[
+                  styles.liveModeBtnText,
+                  {
+                    color: isCurrent
+                      ? isVisual
+                        ? '#000000'
+                        : '#FFFFFF'
+                      : isVisual
+                      ? '#FFE600'
+                      : '#334155',
+                    fontWeight: isCurrent ? '900' : '700',
+                  },
+                ]}
+              >
+                {m.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+
+        {/* Karşılama Ekranına Dönüş Butonu */}
+        <TouchableOpacity
+          onPress={onOpenOnboarding}
+          style={[styles.onbResetBtn, { borderColor: isVisual ? '#FFE600' : '#94A3B8' }]}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel="Karşılama ekranını aç"
+        >
+          <RotateCcw size={12} color={isVisual ? '#FFE600' : '#64748B'} />
+          <Text style={[styles.onbResetText, { color: isVisual ? '#FFE600' : '#64748B' }]}>
+            Giriş Ekranı
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </View>
+  );
+}
+
 function MainApp() {
   const { currentMode, selectMode, theme } = useAccessibility();
-  const [isOnboarding, setIsOnboarding] = useState(true);
+  // Sunum için doğrudan feed ekranında başlar!
+  const [isOnboarding, setIsOnboarding] = useState(false);
   const [activeTab, setActiveTab] = useState('feed');
   const [posts, setPosts] = useState(INITIAL_POSTS);
   const [activeSuggestion, setActiveSuggestion] = useState(null);
@@ -66,7 +145,7 @@ function MainApp() {
             e.preventDefault();
             const firstPost = posts[0];
             SpeechService.speak(
-              `${firstPost.author.name} paylaştı: ${firstPost.content}. Paylaşılan görselin betimlemesi: ${firstPost.aiDescription}`
+              `${firstPost.author.name} paylaştı: ${firstPost.content}. Paylaşılan görselin Türkçe betimlemesi: ${firstPost.aiDescription}`
             );
           }
         }
@@ -138,7 +217,7 @@ function MainApp() {
           </View>
         )}
 
-        {/* 1. EĞER HENÜZ MOD SEÇİLMEDİYSE: KARŞILAMA VE MOD SEÇİM EKRANI */}
+        {/* 1. EĞER KULLANICI İSTERSE GİRİŞ / TANITIM EKRANI */}
         {isOnboarding ? (
           <OnboardingScreen
             onComplete={() => {
@@ -147,11 +226,15 @@ function MainApp() {
             }}
           />
         ) : (
-          /* 2. MOD SEÇİLDİ: UYGULAMA SEÇİLEN MODUN ŞEKLİNDE DEVAM EDER */
+          /* 2. ANA UYGULAMA (GÖRME ENGELLİ 16:1 MODUYLA BAŞLAR) */
           <>
             {/* Üst Çubuk */}
             {activeTab !== 'settings' && activeTab !== 'create' && (
-              <Header onOpenAccessibility={() => setActiveTab('settings')} />
+              <>
+                <Header onOpenAccessibility={() => setActiveTab('settings')} />
+                {/* Jüri Canlı Mod Seçici Çubuğu */}
+                <LiveModeBar onOpenOnboarding={() => setIsOnboarding(true)} />
+              </>
             )}
 
             {/* Gövde */}
@@ -214,7 +297,7 @@ export default function App() {
 const styles = StyleSheet.create({
   outerCanvas: {
     flex: 1,
-    backgroundColor: '#07090E', // Profesyonel derin uzay laciverti
+    backgroundColor: '#07090E',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -248,24 +331,24 @@ const styles = StyleSheet.create({
     width: 96,
     height: 22,
     backgroundColor: '#000000',
-    borderRadius: 11,
+    borderRadius: 14,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
     paddingRight: 10,
-    gap: 6,
+    gap: 8,
   },
   cameraLens: {
-    width: 9,
-    height: 9,
-    borderRadius: 4.5,
-    backgroundColor: '#1E293B',
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#111827',
   },
   sensorDot: {
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#0F172A',
+    backgroundColor: '#052e16',
   },
   statusRightIcons: {
     flexDirection: 'row',
@@ -277,30 +360,64 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   miniBattery: {
-    width: 19,
-    height: 10,
+    width: 22,
+    height: 11,
     borderRadius: 3,
-    borderWidth: 1,
-    padding: 1,
+    borderWidth: 1.5,
+    padding: 1.5,
     justifyContent: 'center',
   },
   batteryFill: {
-    width: '75%',
+    width: '70%',
     height: '100%',
     borderRadius: 1.5,
+  },
+  liveModeContainer: {
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+  },
+  liveModeScroll: {
+    paddingHorizontal: 12,
+    gap: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  liveModeBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  liveModeBtnText: {
+    fontSize: 11,
+  },
+  onbResetBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    marginLeft: 4,
+  },
+  onbResetText: {
+    fontSize: 10,
+    fontWeight: '700',
   },
   tabBody: {
     flex: 1,
   },
   iosHomeIndicatorArea: {
+    height: 20,
     alignItems: 'center',
-    paddingBottom: 8,
-    paddingTop: 4,
+    justifyContent: 'center',
   },
   iosHomeBar: {
-    width: 130,
-    height: 4.5,
-    borderRadius: 3,
+    width: 120,
+    height: 4,
+    borderRadius: 2,
   },
   placeholderCenter: {
     flex: 1,
@@ -309,21 +426,21 @@ const styles = StyleSheet.create({
     padding: 30,
   },
   placeholderIconPill: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: 72,
+    height: 72,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
   },
   placeholderTitle: {
-    fontSize: 22,
-    fontWeight: '900',
+    fontSize: 20,
+    fontWeight: '800',
     marginBottom: 8,
   },
   placeholderSub: {
-    fontSize: 14,
+    fontSize: 13,
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 18,
   },
 });

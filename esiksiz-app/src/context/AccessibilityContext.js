@@ -13,8 +13,9 @@ export const MODES = {
 };
 
 export const AccessibilityProvider = ({ children }) => {
-  const [currentMode, setCurrentMode] = useState(null);
-  const [fontSizeScale, setFontSizeScale] = useState(1.0);
+  // Sunum için varsayılan olarak doğrudan GÖRME ENGELLİ MODU ile açılır!
+  const [currentMode, setCurrentMode] = useState(MODES.VISUAL);
+  const [fontSizeScale, setFontSizeScale] = useState(1.25);
   const [bionicReading, setBionicReading] = useState(false);
   const [alwaysCaptions, setAlwaysCaptions] = useState(false);
   const [hideClutter, setHideClutter] = useState(false);
@@ -35,7 +36,6 @@ export const AccessibilityProvider = ({ children }) => {
       setTidActive(false);
       setFocusRulerActive(false);
 
-      // Görme Engelli Birey İçin Sesli Rehber Karşılama
       setTimeout(() => {
         const welcomeMsg = reason === 'screen_reader'
           ? 'Ekran okuyucu sisteminiz algılandı. Görme desteği modu sıfır tıklama ile otomatik başlatıldı. 16:1 kontrast devrede. Karta dokunarak yazıyı ve görsel betimlemesini dinleyebilirsiniz.'
@@ -43,7 +43,7 @@ export const AccessibilityProvider = ({ children }) => {
           ? 'Cihaz sallama jesti algılandı. Görme desteği modu devreye alındı. Karta dokunarak gönderiyi dinleyebilirsiniz.'
           : 'Görme desteği modu devrede. 16:1 rekor kontrast sağlandı. Ekrandaki herhangi bir gönderiye dokunarak hem yazıyı hem yapay zekâ görsel açıklamasını dinleyebilirsiniz.';
         SpeechService.speak(welcomeMsg);
-      }, 350);
+      }, 300);
     } else if (mode === MODES.HEARING) {
       setFontSizeScale(1.05);
       setBionicReading(false);
@@ -51,6 +51,7 @@ export const AccessibilityProvider = ({ children }) => {
       setHideClutter(false);
       setTidActive(true);
       setFocusRulerActive(false);
+      SpeechService.speak('İşitme modu devrede. Videolarda Türk İşaret Dili avatarı ve çevresel ses betimlemeleri aktif.');
     } else if (mode === MODES.NEURO) {
       setFontSizeScale(1.1);
       setBionicReading(true);
@@ -58,6 +59,7 @@ export const AccessibilityProvider = ({ children }) => {
       setHideClutter(true);
       setTidActive(false);
       setFocusRulerActive(true);
+      SpeechService.speak('Nörogelişimsel sakin mod devrede. Biyonik okuma ve odak cetveli aktif.');
     } else if (mode === MODES.MOTOR) {
       setFontSizeScale(1.25);
       setBionicReading(false);
@@ -65,6 +67,7 @@ export const AccessibilityProvider = ({ children }) => {
       setHideClutter(true);
       setTidActive(false);
       setFocusRulerActive(false);
+      SpeechService.speak('Motor beceri modu devrede. Dev dokunma hedefleri aktif.');
     } else {
       setFontSizeScale(1.0);
       setBionicReading(false);
@@ -72,33 +75,24 @@ export const AccessibilityProvider = ({ children }) => {
       setHideClutter(false);
       setTidActive(false);
       setFocusRulerActive(false);
+      SpeechService.speak('Standart sosyal medya modu devrede.');
     }
   };
 
-  // 1. KADEME: İŞLETİM SİSTEMİ EKRAN OKUYUCU (TALKBACK / VOICEOVER) OTOMATİK ALGILAMA
+  // 1. KADEME: İŞLETİM SİSTEMİ EKRAN OKUYUCU OTOMATİK ALGILAMA
   useEffect(() => {
     if (AccessibilityInfo && AccessibilityInfo.isScreenReaderEnabled) {
       AccessibilityInfo.isScreenReaderEnabled()
         .then((isEnabled) => {
-          if (isEnabled && currentMode === null) {
+          if (isEnabled) {
             selectMode(MODES.VISUAL, 'screen_reader');
           }
         })
         .catch(() => {});
-
-      const sub = AccessibilityInfo.addEventListener('screenReaderChanged', (isEnabled) => {
-        if (isEnabled) {
-          selectMode(MODES.VISUAL, 'screen_reader');
-        }
-      });
-
-      return () => {
-        if (sub && sub.remove) sub.remove();
-      };
     }
   }, []);
 
-  // 3. KADEME: CİHAZI SALLAMA (SHAKE TO TOGGLE) JEST ALGILAMA
+  // 3. KADEME: CİHAZI SALLAMA (SHAKE TO TOGGLE)
   useEffect(() => {
     if (Platform.OS === 'web' && typeof window !== 'undefined' && 'DeviceMotionEvent' in window) {
       let lastX = 0, lastY = 0, lastZ = 0;
@@ -153,6 +147,7 @@ export const AccessibilityProvider = ({ children }) => {
           primary: '#FFE600',
           border: '#FFE600',
           inputBg: '#171717',
+          navBg: '#000000',
         }
       : isHearing
       ? {
@@ -164,6 +159,7 @@ export const AccessibilityProvider = ({ children }) => {
           primary: '#0284C7',
           border: '#E0F2FE',
           inputBg: '#F8FAFC',
+          navBg: '#FFFFFF',
         }
       : isNeuro
       ? {
@@ -175,6 +171,7 @@ export const AccessibilityProvider = ({ children }) => {
           primary: '#0D9488',
           border: '#E6F4F1',
           inputBg: '#FAFAF9',
+          navBg: '#FFFFFF',
         }
       : isMotor
       ? {
@@ -186,6 +183,7 @@ export const AccessibilityProvider = ({ children }) => {
           primary: '#7C3AED',
           border: '#F3E8FF',
           inputBg: '#FDF4FF',
+          navBg: '#FFFFFF',
         }
       : {
           background: '#F8FAFC',
@@ -196,6 +194,7 @@ export const AccessibilityProvider = ({ children }) => {
           primary: '#2563EB',
           border: '#CBD5E1',
           inputBg: '#F1F5F9',
+          navBg: '#FFFFFF',
         },
   };
 
