@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { useAccessibility } from '../context/AccessibilityContext';
 import { SpeechService } from '../services/speechService';
-import { Volume2, VolumeX, Heart, MessageCircle, Share2, Sparkles, Play, Pause, Bookmark, Ear, Music } from 'lucide-react-native';
+import { Volume2, VolumeX, Heart, MessageCircle, Share2, Sparkles, Play, Pause, Bookmark, Ear, Music, Volume1 } from 'lucide-react-native';
 
 export const FeedCard = ({ post }) => {
   const { theme, fontSizeScale, bionicReading } = useAccessibility();
@@ -30,19 +30,18 @@ export const FeedCard = ({ post }) => {
     return () => clearInterval(timer);
   }, [isPlayingVideo, post.captions]);
 
-  // GÖRME ENGELLİ İÇİN: Hem paylaşılan yazıyı hem de görseli sırayla sesli okuma!
+  // GÖRME ENGELLİ KULLANICI İÇİN: Karta dokununca hem yazıyı hem görseli sırayla sesli okuma!
   const handleToggleReadPostAndImage = () => {
     if (isReadingPost) {
       SpeechService.stop();
       setIsReadingPost(false);
     } else {
       setIsReadingPost(true);
-      // Önce yazar ve gönderi yazısı, ardından varsa görsel betimlemesi
       let fullSpeech = `${post.author.name} paylaştı: ${post.content}. `;
       if (post.image && post.aiDescription) {
         fullSpeech += `Paylaşılan görselin betimlemesi: ${post.aiDescription}`;
       } else if (post.videoUrl) {
-        fullSpeech += `Paylaşılan videonun betimlemesi: ${post.aiDescription || 'Videoda klavyede hızlıca kod yazan eller yakın plandan gösteriliyor.'}`;
+        fullSpeech += `Paylaşılan videonun betimlemesi: ${post.aiDescription || 'Videoda klavyede kod yazan eller yakın plandan gösteriliyor.'}`;
       }
 
       SpeechService.speak(
@@ -54,7 +53,7 @@ export const FeedCard = ({ post }) => {
     }
   };
 
-  // Bionic Reading Fonksiyonu (DEHB / Odaklanma Modu)
+  // Bionic Reading Metin Formatı
   const renderFormattedText = (text) => {
     if (!bionicReading) return text;
     const words = text.split(' ');
@@ -84,161 +83,160 @@ export const FeedCard = ({ post }) => {
       accessible={true}
       accessibilityRole="article"
       accessibilityLabel={`${post.author.name} gönderisi: ${post.content}`}
+      accessibilityHint={isVisual ? "Bu gönderiyi ve görsel açıklamasını baştan sona sesli dinlemek için dokunun." : undefined}
     >
-      {/* 1. Görme Engelli Modundaysa: EN TEPEDE DEVA SA VE KOLAY BULUNAN SESLİ OKUMA BUTONU */}
+      {/* GÖRME MODUNDA TÜM KARTIN EN TEPESİNDE SESLİ REHBER VE DOKUNMA BANTİ */}
       {isVisual && (
         <TouchableOpacity
           onPress={handleToggleReadPostAndImage}
+          activeOpacity={0.8}
           style={[
-            styles.voiceHeroBtn,
+            styles.voiceBanner,
             { backgroundColor: isReadingPost ? '#DC2626' : '#FFE600' },
           ]}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel={
-            isReadingPost
-              ? 'Sesli okumayı durdur'
-              : 'Bu gönderiyi ve görsel açıklamasını Türkçe sesli dinle'
-          }
+          accessibilityLabel={isReadingPost ? 'Okumayı durdur' : 'Gönderiyi ve görseli sesli dinle'}
         >
           {isReadingPost ? (
             <VolumeX size={20} color="#FFFFFF" />
           ) : (
             <Volume2 size={20} color="#000000" />
           )}
-          <Text
-            style={[
-              styles.voiceHeroText,
-              { color: isReadingPost ? '#FFFFFF' : '#000000' },
-            ]}
-          >
-            {isReadingPost ? 'Okumayı Durdur ⏹️' : '🔊 Gönderiyi ve Görseli Sesli Dinle'}
+          <Text style={[styles.voiceBannerText, { color: isReadingPost ? '#FFFFFF' : '#000000' }]}>
+            {isReadingPost ? 'Okuma Sürüyor (Durdurmak İçin Dokunun) ⏹️' : '🔊 Dinlemek İçin Karta Dokunun'}
           </Text>
         </TouchableOpacity>
       )}
 
-      {/* 2. Kullanıcı Başlığı */}
-      <View style={styles.authorRow}>
-        <Image
-          source={{ uri: post.author.avatar }}
-          style={[
-            styles.avatar,
-            {
-              borderColor: isVisual ? '#FFE600' : colors.border,
-              borderWidth: isVisual ? 2 : 1,
-            },
-          ]}
-        />
-        <View style={styles.authorInfo}>
-          <Text style={[styles.authorName, { color: colors.text, fontSize: 16 * fontSizeScale }]}>
-            {post.author.name}
-          </Text>
-          <Text style={[styles.authorHandle, { color: colors.textMuted, fontSize: 12 * fontSizeScale }]}>
-            {post.author.handle} • {post.timestamp}
-          </Text>
-        </View>
-
-        {/* Görme Modunda Değilken Standart Dinleme İkonu */}
-        {!isVisual && (
-          <TouchableOpacity
-            onPress={handleToggleReadPostAndImage}
-            style={[styles.smallListenBtn, { backgroundColor: colors.inputBg }]}
-            accessible={true}
-            accessibilityRole="button"
-            accessibilityLabel="Gönderiyi sesli dinle"
-          >
-            {isReadingPost ? (
-              <VolumeX size={16} color="#DC2626" />
-            ) : (
-              <Volume2 size={16} color={colors.primary} />
-            )}
-          </TouchableOpacity>
-        )}
-      </View>
-
-      {/* 3. Gönderi Metni (Yazı) */}
-      <Text
-        style={[
-          styles.postText,
-          {
-            color: colors.text,
-            fontSize: 15 * fontSizeScale,
-            lineHeight: (isVisual ? 24 : 22) * fontSizeScale,
-          },
-        ]}
+      {/* KART GÖVDESİ - GÖRME MODUNDA KARTIN HERHANGİ BİR YERİNE DOKUNULDUĞUNDA DA SESLENDİRİR! */}
+      <TouchableOpacity
+        onPress={isVisual ? handleToggleReadPostAndImage : undefined}
+        activeOpacity={isVisual ? 0.85 : 1}
       >
-        {renderFormattedText(post.content)}
-      </Text>
+        {/* Kullanıcı Başlığı */}
+        <View style={styles.authorRow}>
+          <Image
+            source={{ uri: post.author.avatar }}
+            style={[
+              styles.avatar,
+              {
+                borderColor: isVisual ? '#FFE600' : colors.border,
+                borderWidth: isVisual ? 2 : 1,
+              },
+            ]}
+          />
+          <View style={styles.authorInfo}>
+            <Text style={[styles.authorName, { color: colors.text, fontSize: 16 * fontSizeScale }]}>
+              {post.author.name}
+            </Text>
+            <Text style={[styles.authorHandle, { color: colors.textMuted, fontSize: 12 * fontSizeScale }]}>
+              {post.author.handle} • {post.timestamp}
+            </Text>
+          </View>
 
-      {/* 4. Görsel Varsa */}
-      {post.image && (
-        <View style={styles.mediaContainer}>
-          <Image source={{ uri: post.image }} style={styles.mediaImage} />
-
-          {/* GÖRME ENGELLİ İÇİN: Görselin hemen altında detaylı Türkçe betimleme kutusu */}
-          {isVisual && post.aiDescription && (
-            <View style={styles.visualDescriptionBox}>
-              <View style={styles.visualBadgeRow}>
-                <Sparkles size={16} color="#FFE600" />
-                <Text style={styles.visualBadgeTitle}>Görsel Açıklaması (AI):</Text>
-              </View>
-              <Text style={[styles.visualDescText, { fontSize: 14 * fontSizeScale }]}>
-                {post.aiDescription}
-              </Text>
-            </View>
+          {/* Görme Modunda Değilken Standart Sesli Dinleme İkonu */}
+          {!isVisual && (
+            <TouchableOpacity
+              onPress={handleToggleReadPostAndImage}
+              style={[styles.smallListenBtn, { backgroundColor: colors.inputBg }]}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Gönderiyi sesli dinle"
+            >
+              {isReadingPost ? (
+                <VolumeX size={16} color="#DC2626" />
+              ) : (
+                <Volume2 size={16} color={colors.primary} />
+              )}
+            </TouchableOpacity>
           )}
         </View>
-      )}
 
-      {/* 5. Video Varsa */}
-      {post.videoUrl && (
-        <View style={styles.mediaContainer}>
-          <Image source={{ uri: post.videoPoster }} style={styles.mediaImage} />
-          <TouchableOpacity
-            onPress={() => setIsPlayingVideo(!isPlayingVideo)}
-            style={[
-              styles.playBtn,
-              { backgroundColor: isVisual ? '#FFE600' : colors.primary },
-            ]}
-            accessible={true}
-            accessibilityRole="button"
-          >
-            {isPlayingVideo ? (
-              <Pause size={24} color={isVisual ? '#000000' : '#FFFFFF'} />
-            ) : (
-              <Play size={24} color={isVisual ? '#000000' : '#FFFFFF'} />
+        {/* Gönderi Metni (Yazı) */}
+        <Text
+          style={[
+            styles.postText,
+            {
+              color: colors.text,
+              fontSize: 15 * fontSizeScale,
+              lineHeight: (isVisual ? 24 : 22) * fontSizeScale,
+            },
+          ]}
+        >
+          {renderFormattedText(post.content)}
+        </Text>
+
+        {/* Görsel */}
+        {post.image && (
+          <View style={styles.mediaContainer}>
+            <Image source={{ uri: post.image }} style={styles.mediaImage} />
+
+            {/* GÖRME ENGELLİ İÇİN: Görselin Altında Açık Türkçe Betimleme Kutusu */}
+            {isVisual && post.aiDescription && (
+              <View style={styles.visualDescriptionBox}>
+                <View style={styles.visualBadgeRow}>
+                  <Sparkles size={16} color="#FFE600" />
+                  <Text style={styles.visualBadgeTitle}>Görsel Açıklaması (AI):</Text>
+                </View>
+                <Text style={[styles.visualDescText, { fontSize: 14 * fontSizeScale }]}>
+                  {post.aiDescription}
+                </Text>
+              </View>
             )}
-          </TouchableOpacity>
-
-          {/* Video Üzeri Canlı Altyazı */}
-          <View style={styles.videoSubtitleBar}>
-            <Text style={[styles.videoSubtitleText, { color: isVisual ? '#FFE600' : '#FFFFFF' }]}>
-              {post.captions[currentCaptionIndex].text}
-            </Text>
           </View>
-        </View>
-      )}
+        )}
 
-      {/* 6. İŞİTME ENGELLİ (SAĞIR) KULLANICI İÇİN: DUYULAMAYAN ÇEVRESEL SESLERİN BETİMLEMESİ */}
-      {isHearing && post.soundDescriptions && (
-        <View style={styles.soundDescriptionContainer}>
-          <View style={styles.soundHeaderRow}>
-            <Ear size={16} color="#0284C7" />
-            <Text style={styles.soundHeaderTitle}>
-              Duyulamayan Seslerin ve Ortamın Betimlemesi:
-            </Text>
-          </View>
-          <View style={styles.soundList}>
-            {post.soundDescriptions.map((sound, sIdx) => (
-              <Text key={sIdx} style={[styles.soundItemText, { fontSize: 13 * fontSizeScale }]}>
-                {sound}
+        {/* Video */}
+        {post.videoUrl && (
+          <View style={styles.mediaContainer}>
+            <Image source={{ uri: post.videoPoster }} style={styles.mediaImage} />
+            <TouchableOpacity
+              onPress={() => setIsPlayingVideo(!isPlayingVideo)}
+              style={[
+                styles.playBtn,
+                { backgroundColor: isVisual ? '#FFE600' : colors.primary },
+              ]}
+              accessible={true}
+              accessibilityRole="button"
+            >
+              {isPlayingVideo ? (
+                <Pause size={24} color={isVisual ? '#000000' : '#FFFFFF'} />
+              ) : (
+                <Play size={24} color={isVisual ? '#000000' : '#FFFFFF'} />
+              )}
+            </TouchableOpacity>
+
+            {/* Video Üzeri Canlı Altyazı */}
+            <View style={styles.videoSubtitleBar}>
+              <Text style={[styles.videoSubtitleText, { color: isVisual ? '#FFE600' : '#FFFFFF' }]}>
+                {post.captions[currentCaptionIndex].text}
               </Text>
-            ))}
+            </View>
           </View>
-        </View>
-      )}
+        )}
 
-      {/* 7. Alt Etkileşim Butonları (Sade ve Geniş) */}
+        {/* İŞİTME ENGELLİ (SAĞIR) KULLANICI İÇİN: DUYULAMAYAN ÇEVRESEL SESLERİN BETİMLEMESİ */}
+        {isHearing && post.soundDescriptions && (
+          <View style={styles.soundDescriptionContainer}>
+            <View style={styles.soundHeaderRow}>
+              <Ear size={16} color="#0284C7" />
+              <Text style={styles.soundHeaderTitle}>
+                Duyulamayan Seslerin ve Ortamın Betimlemesi:
+              </Text>
+            </View>
+            <View style={styles.soundList}>
+              {post.soundDescriptions.map((sound, sIdx) => (
+                <Text key={sIdx} style={[styles.soundItemText, { fontSize: 13 * fontSizeScale }]}>
+                  {sound}
+                </Text>
+              ))}
+            </View>
+          </View>
+        )}
+      </TouchableOpacity>
+
+      {/* Alt Etkileşim Butonları */}
       <View
         style={[
           styles.actionsRow,
@@ -304,17 +302,17 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     overflow: 'hidden',
   },
-  voiceHeroBtn: {
+  voiceBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    minHeight: 52, // Büyük ve rahat dokunmatik alan
+    minHeight: 50,
   },
-  voiceHeroText: {
-    fontSize: 15,
+  voiceBannerText: {
+    fontSize: 14,
     fontWeight: '900',
     letterSpacing: 0.3,
   },
@@ -419,7 +417,6 @@ const styles = StyleSheet.create({
     color: '#0369A1',
     fontSize: 12,
     fontWeight: '800',
-    letterSpacing: 0.2,
   },
   soundList: {
     gap: 4,

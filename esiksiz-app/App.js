@@ -8,6 +8,7 @@ import { FeedScreen } from './src/screens/FeedScreen';
 import { CreatePostScreen } from './src/screens/CreatePostScreen';
 import { AccessibilitySettingsScreen } from './src/screens/AccessibilitySettingsScreen';
 import { AdaptiveEngine } from './src/engine/AdaptiveEngine';
+import { SpeechService } from './src/services/speechService';
 import { INITIAL_POSTS } from './src/services/aiCaptionService';
 import { Compass, Bell } from 'lucide-react-native';
 
@@ -39,7 +40,7 @@ function NotificationsPlaceholderScreen() {
 
 function MainApp() {
   const { currentMode, selectMode, theme } = useAccessibility();
-  const [isOnboarding, setIsOnboarding] = useState(true); // İlk açılışta mod seçimiyle başlar
+  const [isOnboarding, setIsOnboarding] = useState(true);
   const [activeTab, setActiveTab] = useState('feed');
   const [posts, setPosts] = useState(INITIAL_POSTS);
   const [activeSuggestion, setActiveSuggestion] = useState(null);
@@ -51,6 +52,26 @@ function MainApp() {
       setActiveSuggestion(suggestion);
     });
   }, []);
+
+  // Web Ortamında Klavye ile (Boşluk Tuşu) Görme Engelli Hızlı Okuma Desteği
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      const handleKeyDown = (e) => {
+        if (e.code === 'Space' && theme.isVisual && activeTab === 'feed' && !isOnboarding) {
+          // Input içinde değilse sayfayı kaydırmasın ve ilk gönderiyi seslendirsin
+          if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            const firstPost = posts[0];
+            SpeechService.speak(
+              `${firstPost.author.name} paylaştı: ${firstPost.content}. Paylaşılan görselin betimlemesi: ${firstPost.aiDescription}`
+            );
+          }
+        }
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [theme.isVisual, activeTab, isOnboarding, posts]);
 
   const handleAcceptSuggestion = () => {
     if (activeSuggestion) {

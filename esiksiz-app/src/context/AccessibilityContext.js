@@ -1,16 +1,18 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { SpeechService } from '../services/speechService';
+import { Platform } from 'react-native';
 
 const AccessibilityContext = createContext();
 
 export const MODES = {
   STANDARD: 'standard',
-  VISUAL: 'visual',         // Görme Engelli / Az Gören (Yüksek Kontrast, Büyük Hedefler, Sesli Betimleme)
-  HEARING: 'hearing',       // İşitme Engelli (Sürekli Altyazı, Görsel Bildirim, Ses Rozetleri)
-  NEURO: 'neuro',           // Nörogelişimsel (DEHB/Otizm - Bionic Reading, Sıfır Animasyon, Sakin Arayüz)
+  VISUAL: 'visual',         // Görme Engelli / Az Gören (Yüksek Kontrast, Tüm Kart Sesli, Sesli Rehber)
+  HEARING: 'hearing',       // İşitme Engelli (Sürekli Altyazı, Ortam Sesleri Betimlemesi)
+  NEURO: 'neuro',           // Nörogelişimsel (DEHB/Otizm - Bionic Reading, Sıfır Animasyon)
 };
 
 export const AccessibilityProvider = ({ children }) => {
-  const [currentMode, setCurrentMode] = useState(null); // Başlangıçta null, kullanıcı seçim yapınca mod giyilir
+  const [currentMode, setCurrentMode] = useState(null);
   const [fontSizeScale, setFontSizeScale] = useState(1.0);
   const [bionicReading, setBionicReading] = useState(false);
   const [alwaysCaptions, setAlwaysCaptions] = useState(false);
@@ -18,7 +20,7 @@ export const AccessibilityProvider = ({ children }) => {
   const [adaptiveEngineActive, setAdaptiveEngineActive] = useState(true);
   const [pendingSuggestion, setPendingSuggestion] = useState(null);
 
-  // Mod Seçildiğinde Uygulamanın Davranışını ve Şeklini Belirle
+  // Mod Seçildiğinde Uygulamanın Davranışını Belirle
   const selectMode = (mode) => {
     setCurrentMode(mode);
     if (mode === MODES.VISUAL) {
@@ -26,6 +28,13 @@ export const AccessibilityProvider = ({ children }) => {
       setBionicReading(false);
       setAlwaysCaptions(false);
       setHideClutter(false);
+
+      // Görme Engelli Birey İçin Otomatik Sesli Karşılama ve Yönlendirme (Voice Guidance)
+      setTimeout(() => {
+        SpeechService.speak(
+          'Görme desteği modu devrede. Ekrandaki herhangi bir gönderiye dokunarak hem yazıyı hem görsel açıklamasını dinleyebilirsiniz. Bilgisayarda Boşluk tuşu da okumayı başlatır.'
+        );
+      }, 400);
     } else if (mode === MODES.HEARING) {
       setFontSizeScale(1.05);
       setBionicReading(false);
@@ -35,7 +44,7 @@ export const AccessibilityProvider = ({ children }) => {
       setFontSizeScale(1.1);
       setBionicReading(true);
       setAlwaysCaptions(false);
-      setHideClutter(true); // Dikkat dağıtıcı beğeni sayıları ve animasyonları gizler
+      setHideClutter(true);
     } else {
       setFontSizeScale(1.0);
       setBionicReading(false);
@@ -44,18 +53,15 @@ export const AccessibilityProvider = ({ children }) => {
     }
   };
 
-  // Seçilen Moda Özel Renk Paleti ve Tasarım Dili
   const isVisual = currentMode === MODES.VISUAL;
   const isHearing = currentMode === MODES.HEARING;
   const isNeuro = currentMode === MODES.NEURO;
-  const isStandard = currentMode === MODES.STANDARD || currentMode === null;
 
   const theme = {
     mode: currentMode,
     isVisual,
     isHearing,
     isNeuro,
-    isStandard,
     isHighContrast: isVisual,
     fontSizeScale,
     bionicReading,
@@ -63,7 +69,7 @@ export const AccessibilityProvider = ({ children }) => {
     hideClutter,
     colors: isVisual
       ? {
-          // GÖRME MODU: Saf Siyah, Canlı Sarı (#FFE600), Beyaz (#FFFFFF) - 16:1 Kontrast
+          // GÖRME MODU: Saf Siyah, Canlı Sarı (#FFE600), Beyaz - 16:1 Kontrast
           background: '#000000',
           cardBackground: '#0F0F0F',
           cardBorder: '#FFE600',
@@ -80,7 +86,7 @@ export const AccessibilityProvider = ({ children }) => {
         }
       : isHearing
       ? {
-          // İŞİTME MODU: Okyanus Mavisi, Canlı Turkuaz, Net Beyaz Kontrast
+          // İŞİTME MODU: Net Mavi ve Beyaz
           background: '#F0F7FF',
           cardBackground: '#FFFFFF',
           cardBorder: '#0284C7',
@@ -97,7 +103,7 @@ export const AccessibilityProvider = ({ children }) => {
         }
       : isNeuro
       ? {
-          // NÖROGELİŞİMSEL SAKİN MOD: Pastel Adaçayı / Soft Teal, Göz Yormayan Gri
+          // NÖROGELİŞİMSEL SAKİN MOD: Pastel Adaçayı / Soft Teal
           background: '#F4F6F8',
           cardBackground: '#FFFFFF',
           cardBorder: '#CBD5E1',
@@ -113,7 +119,7 @@ export const AccessibilityProvider = ({ children }) => {
           inactiveNav: '#94A3B8',
         }
       : {
-          // STANDART MOD: Modern NSosyal Mavisi ve Temiz Beyaz
+          // STANDART MOD
           background: '#F8FAFC',
           cardBackground: '#FFFFFF',
           cardBorder: '#E2E8F0',
@@ -139,7 +145,6 @@ export const AccessibilityProvider = ({ children }) => {
         fontSizeScale,
         setFontSizeScale,
         bionicReading,
-        setBionicReading,
         alwaysCaptions,
         hideClutter,
         adaptiveEngineActive,
