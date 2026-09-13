@@ -54,14 +54,14 @@ export const OnboardingScreen = ({ onComplete }) => {
               <Eye size={22} color="#000000" />
             </View>
             <View style={styles.tagYellow}>
-              <Text style={styles.tagYellowText}>16:1 KONTRAST</Text>
+              <Text style={styles.tagYellowText}>16.1:1 KONTRAST • 555nm SARI</Text>
             </View>
           </View>
           <Text style={[styles.cardTitle, { color: '#FFE600' }]}>
             Görme Desteği & Sesli Betimleme
           </Text>
           <Text style={[styles.cardDescription, { color: '#FFFFFF' }]}>
-            Karta tek dokunuşla hem yazıyı hem görsel açıklamasını kesintisiz dinleyin. Saf siyah zemin üzerine canlı sarı ve beyaz yüksek kontrast.
+            Oftalmolojik 16.1:1 rekor kontrastla ışık parlamasını (fotofobi) sıfırlayan saf siyah zemin. Karta tek dokunuşla yazar, metin ve yapay zekâ görsel açıklamasını dinleyin.
           </Text>
           <View style={styles.actionPromptRow}>
             <Text style={[styles.actionPromptText, { color: '#FFE600' }]}>Bu Modla Başla</Text>
@@ -90,7 +90,7 @@ export const OnboardingScreen = ({ onComplete }) => {
             İşitme Desteği & Ortam Sesleri
           </Text>
           <Text style={[styles.cardDescription, { color: '#334155' }]}>
-            Duyulamayan çevresel seslerin (müzik, alkış, efektler) detaylı metin betimlemesi, senkronize altyazı ve Türk İşaret Dili (TİD) tercümanı.
+            Duyulamayan çevresel seslerin (müzik, alkış, efektler) detaylı metin betimlemesi, senkronize altyazı ve Türk İşaret Dili (TİD) avatarı.
           </Text>
           <View style={styles.actionPromptRow}>
             <Text style={[styles.actionPromptText, { color: '#0284C7' }]}>Bu Modla Başla</Text>
@@ -112,14 +112,14 @@ export const OnboardingScreen = ({ onComplete }) => {
               <Sparkles size={22} color="#FFFFFF" />
             </View>
             <View style={styles.tagTeal}>
-              <Text style={styles.tagTealText}>BIONIC READING</Text>
+              <Text style={styles.tagTealText}>BIONIC READING + ODAK</Text>
             </View>
           </View>
           <Text style={[styles.cardTitle, { color: '#0F766E' }]}>
             Nörogelişimsel Sakin Mod (DEHB / Otizm)
           </Text>
           <Text style={[styles.cardDescription, { color: '#334155' }]}>
-            Kelimelerin baş harflerini kalınlaştıran Bionic Reading, odak cetveli, sıfır animasyon ve duyusal aşırı yükü arındıran sakinleştirilmiş arayüz.
+            Kelimelerin baş harflerini kalınlaştıran Biyonik Okuma, satır kaydırmayı engelleyen odak cetveli ve duyusal yorgunluğu arındıran sade akış.
           </Text>
           <View style={styles.actionPromptRow}>
             <Text style={[styles.actionPromptText, { color: '#0D9488' }]}>Bu Modla Başla</Text>
@@ -141,14 +141,14 @@ export const OnboardingScreen = ({ onComplete }) => {
               <HandMetal size={22} color="#FFFFFF" />
             </View>
             <View style={styles.tagPurple}>
-              <Text style={styles.tagPurpleText}>DEV HEDEFLER 56PX</Text>
+              <Text style={styles.tagPurpleText}>56px+ DEV DOKUNMA</Text>
             </View>
           </View>
-          <Text style={[styles.cardTitle, { color: '#6D28D9' }]}>
+          <Text style={[styles.cardTitle, { color: '#6B21A8' }]}>
             Fiziksel & Motor Beceri Desteği
           </Text>
-          <Text style={[styles.cardDescription, { color: '#4C1D95' }]}>
-            El titremesi ve ince motor kısıtları olan bireyler için genişletilmiş dev dokunma butonları ve yanlış dokunma filtrelemeli ergonomik arayüz.
+          <Text style={[styles.cardDescription, { color: '#334155' }]}>
+            Titreyen veya hassas hareket kısıtı olan eller için 56px dev dokunma hedefleri, geniş tıklama toleransı ve basitleştirilmiş arayüz.
           </Text>
           <View style={styles.actionPromptRow}>
             <Text style={[styles.actionPromptText, { color: '#7C3AED' }]}>Bu Modla Başla</Text>
@@ -156,32 +156,32 @@ export const OnboardingScreen = ({ onComplete }) => {
           </View>
         </TouchableOpacity>
 
-        {/* 5. STANDART NSOSYAL GÖRÜNÜMÜ */}
+        {/* 5. STANDART NSOSYAL */}
         <TouchableOpacity
           onPress={() => handleChooseMode(MODES.STANDARD)}
           style={[styles.card, styles.cardStandard]}
           activeOpacity={0.85}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="Standart NSosyal Görünümü."
+          accessibilityLabel="Standart NSosyal Deneyimi."
         >
           <View style={styles.cardHeader}>
-            <View style={[styles.iconPill, { backgroundColor: '#2563EB' }]}>
+            <View style={[styles.iconPill, { backgroundColor: '#64748B' }]}>
               <LayoutGrid size={22} color="#FFFFFF" />
             </View>
-            <View style={styles.tagGray}>
-              <Text style={styles.tagGrayText}>VARSAYILAN</Text>
+            <View style={styles.tagSlate}>
+              <Text style={styles.tagSlateText}>KLASİK AKIŞ</Text>
             </View>
           </View>
-          <Text style={[styles.cardTitle, { color: '#0F172A' }]}>
-            Standart Görünüm
+          <Text style={[styles.cardTitle, { color: '#1E293B' }]}>
+            Standart NSosyal Modu
           </Text>
-          <Text style={[styles.cardDescription, { color: '#64748B' }]}>
-            Varsayılan modern NSosyal sosyal medya akışı. Dilediğiniz an ayarlardan erişilebilirlik modlarını değiştirebilirsiniz.
+          <Text style={[styles.cardDescription, { color: '#475569' }]}>
+            Sosyal medyanın varsayılan zengin içerik akışı ve modern etkileşim tasarımı.
           </Text>
           <View style={styles.actionPromptRow}>
-            <Text style={[styles.actionPromptText, { color: '#2563EB' }]}>Bu Modla Başla</Text>
-            <ChevronRight size={18} color="#2563EB" />
+            <Text style={[styles.actionPromptText, { color: '#475569' }]}>Bu Modla Başla</Text>
+            <ChevronRight size={18} color="#475569" />
           </View>
         </TouchableOpacity>
       </View>
@@ -199,76 +199,72 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   headerArea: {
-    marginTop: 10,
     marginBottom: 20,
   },
   brandRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 8,
     marginBottom: 10,
   },
   brandText: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: '900',
     color: '#0F172A',
-    letterSpacing: -0.6,
+    letterSpacing: -0.5,
   },
   badgePill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#DBEAFE',
+    backgroundColor: '#EFF6FF',
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
   },
   badgePillText: {
-    color: '#1E40AF',
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: '800',
+    color: '#1D4ED8',
     letterSpacing: 0.5,
   },
   mainTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '800',
     color: '#0F172A',
-    lineHeight: 28,
+    marginBottom: 6,
   },
   subTitle: {
     fontSize: 13,
     color: '#64748B',
-    marginTop: 6,
-    lineHeight: 19,
+    lineHeight: 18,
   },
   optionsList: {
     gap: 14,
   },
   card: {
-    padding: 18,
-    borderRadius: 20,
-    borderWidth: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 3,
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1.5,
   },
   cardVisual: {
     backgroundColor: '#000000',
     borderColor: '#FFE600',
+    borderWidth: 2,
   },
   cardHearing: {
     backgroundColor: '#F0F9FF',
-    borderColor: '#38BDF8',
+    borderColor: '#BAE6FD',
   },
   cardNeuro: {
     backgroundColor: '#F0FDFA',
-    borderColor: '#14B8A6',
+    borderColor: '#99F6E4',
   },
   cardMotor: {
     backgroundColor: '#FAF5FF',
-    borderColor: '#C084FC',
+    borderColor: '#E9D5FF',
   },
   cardStandard: {
     backgroundColor: '#FFFFFF',
@@ -278,12 +274,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   iconPill: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -291,75 +287,74 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFE600',
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 8,
+    borderRadius: 6,
   },
   tagYellowText: {
-    color: '#000000',
     fontSize: 10,
     fontWeight: '900',
+    color: '#000000',
   },
   tagBlue: {
-    backgroundColor: '#BAE6FD',
+    backgroundColor: '#E0F2FE',
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 8,
+    borderRadius: 6,
   },
   tagBlueText: {
-    color: '#0369A1',
     fontSize: 10,
     fontWeight: '900',
+    color: '#0284C7',
   },
   tagTeal: {
     backgroundColor: '#CCFBF1',
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 8,
+    borderRadius: 6,
   },
   tagTealText: {
-    color: '#0F766E',
     fontSize: 10,
     fontWeight: '900',
+    color: '#0F766E',
   },
   tagPurple: {
-    backgroundColor: '#EDE9FE',
+    backgroundColor: '#F3E8FF',
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 8,
+    borderRadius: 6,
   },
   tagPurpleText: {
-    color: '#6D28D9',
     fontSize: 10,
     fontWeight: '900',
+    color: '#7C3AED',
   },
-  tagGray: {
+  tagSlate: {
     backgroundColor: '#F1F5F9',
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 8,
+    borderRadius: 6,
   },
-  tagGrayText: {
-    color: '#475569',
+  tagSlateText: {
     fontSize: 10,
     fontWeight: '900',
+    color: '#475569',
   },
   cardTitle: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '800',
     marginBottom: 6,
   },
   cardDescription: {
     fontSize: 13,
     lineHeight: 18,
-    marginBottom: 14,
+    marginBottom: 12,
   },
   actionPromptRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end',
     gap: 4,
   },
   actionPromptText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '800',
   },
 });
