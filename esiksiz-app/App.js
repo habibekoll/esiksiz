@@ -1,20 +1,49 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, View, SafeAreaView, Platform, StatusBar, Dimensions } from 'react-native';
+import { StyleSheet, View, SafeAreaView, Platform, StatusBar, Text } from 'react-native';
 import { AccessibilityProvider, useAccessibility, MODES } from './src/context/AccessibilityContext';
 import { Header } from './src/components/Header';
+import { BottomNavBar } from './src/components/BottomNavBar';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { FeedScreen } from './src/screens/FeedScreen';
 import { CreatePostScreen } from './src/screens/CreatePostScreen';
-import { SettingsModal } from './src/components/SettingsModal';
-import { JuryConsole } from './src/components/JuryConsole';
+import { AccessibilitySettingsScreen } from './src/screens/AccessibilitySettingsScreen';
 import { AdaptiveEngine } from './src/engine/AdaptiveEngine';
 import { INITIAL_POSTS } from './src/services/aiCaptionService';
+import { Compass, Bell } from 'lucide-react-native';
+
+// Hafif Keşfet Ekranı
+function ExplorePlaceholderScreen() {
+  const { theme } = useAccessibility();
+  return (
+    <View style={[styles.placeholderCenter, { backgroundColor: theme.colors.background }]}>
+      <Compass size={40} color={theme.colors.textMuted} />
+      <Text style={[styles.placeholderTitle, { color: theme.colors.text }]}>Keşfet</Text>
+      <Text style={[styles.placeholderSub, { color: theme.colors.textMuted }]}>
+        NSosyal gündemindeki popüler konular ve erişilebilir içerikler burada yer alır.
+      </Text>
+    </View>
+  );
+}
+
+// Hafif Bildirimler Ekranı
+function NotificationsPlaceholderScreen() {
+  const { theme } = useAccessibility();
+  return (
+    <View style={[styles.placeholderCenter, { backgroundColor: theme.colors.background }]}>
+      <Bell size={40} color={theme.colors.textMuted} />
+      <Text style={[styles.placeholderTitle, { color: theme.colors.text }]}>Bildirimler</Text>
+      <Text style={[styles.placeholderSub, { color: theme.colors.textMuted }]}>
+        Yeni etkileşimler ve sesli/görsel uyarı bildirimleriniz burada listelenir.
+      </Text>
+    </View>
+  );
+}
 
 function MainApp() {
   const { currentMode, setMode, theme } = useAccessibility();
-  const [currentScreen, setCurrentScreen] = useState('onboarding'); // 'onboarding' | 'feed' | 'create'
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(true); // Gerçek uygulama gibi doğrudan akışta başlar
+  const [activeTab, setActiveTab] = useState('feed'); // 'feed' | 'explore' | 'create' | 'notifications' | 'settings'
   const [posts, setPosts] = useState(INITIAL_POSTS);
-  const [settingsVisible, setSettingsVisible] = useState(false);
   const [activeSuggestion, setActiveSuggestion] = useState(null);
 
   // Uyarlanabilir Öneri Motoru Referansı
@@ -39,93 +68,74 @@ function MainApp() {
 
   const handlePostCreated = (newPost) => {
     setPosts([newPost, ...posts]);
-    setCurrentScreen('feed');
+    setActiveTab('feed');
   };
 
   const isHighContrast = theme.isHighContrast;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.outerContainer}>
       <StatusBar
         barStyle={isHighContrast ? 'light-content' : 'dark-content'}
         backgroundColor={isHighContrast ? '#000000' : '#FFFFFF'}
       />
 
-      {/* Ana Çift Panel Düzeni: Mobil Cihaz + Jüri Konsolu */}
-      <View style={styles.desktopLayout}>
-        {/* 1. Mobil Cihaz Mockup Çerçevesi */}
-        <View
-          style={[
-            styles.phoneFrame,
-            {
-              backgroundColor: theme.colors.background,
-              borderColor: isHighContrast ? '#FFE600' : '#334155',
-              borderWidth: Platform.OS === 'web' ? (isHighContrast ? 3.5 : 2) : 0,
-            },
-          ]}
-        >
-          {/* Mobil Dynamic Island / Çentik Simülasyonu */}
-          {Platform.OS === 'web' && (
-            <View style={styles.notchContainer}>
-              <View style={styles.dynamicIsland}>
-                <View style={styles.cameraHole} />
-              </View>
-            </View>
-          )}
+      {/* Telefon Gövdesi Mockup'ı (Masaüstünde odaklanmış gerçek telefon en-boy oranı) */}
+      <View
+        style={[
+          styles.deviceFrame,
+          {
+            backgroundColor: theme.colors.background,
+            borderColor: isHighContrast ? '#FFE600' : '#334155',
+            borderWidth: Platform.OS === 'web' ? (isHighContrast ? 3 : 2) : 0,
+          },
+        ]}
+      >
+        {/* Mobil Dynamic Island Çentiği */}
+        {Platform.OS === 'web' && (
+          <View style={styles.topIslandBar}>
+            <View style={styles.islandPill} />
+          </View>
+        )}
 
-          {/* Üst Başlık (Sadece Feed ve Create ekranlarında) */}
-          {currentScreen !== 'onboarding' && (
-            <Header
-              currentScreen={currentScreen}
-              onOpenSettings={() => setSettingsVisible(true)}
-              onOpenCreate={() => setCurrentScreen('create')}
-              onNavigateHome={() => setCurrentScreen('feed')}
+        {/* Üst Çubuk (Ayarlar ve Paylaşım hariç her yerde) */}
+        {activeTab !== 'settings' && activeTab !== 'create' && (
+          <Header onOpenAccessibility={() => setActiveTab('settings')} />
+        )}
+
+        {/* Sekme Gövdesi */}
+        <View style={styles.tabContent}>
+          {activeTab === 'feed' && (
+            <FeedScreen
+              posts={posts}
+              suggestion={activeSuggestion}
+              onAcceptSuggestion={handleAcceptSuggestion}
+              onDismissSuggestion={handleDismissSuggestion}
             />
           )}
 
-          {/* Ekranlar */}
-          <View style={styles.screenBody}>
-            {currentScreen === 'onboarding' && (
-              <OnboardingScreen onComplete={() => setCurrentScreen('feed')} />
-            )}
+          {activeTab === 'explore' && <ExplorePlaceholderScreen />}
 
-            {currentScreen === 'feed' && (
-              <FeedScreen
-                posts={posts}
-                suggestion={activeSuggestion}
-                onAcceptSuggestion={handleAcceptSuggestion}
-                onDismissSuggestion={handleDismissSuggestion}
-              />
-            )}
+          {activeTab === 'create' && (
+            <CreatePostScreen
+              onBack={() => setActiveTab('feed')}
+              onPostCreated={handlePostCreated}
+            />
+          )}
 
-            {currentScreen === 'create' && (
-              <CreatePostScreen
-                onBack={() => setCurrentScreen('feed')}
-                onPostCreated={handlePostCreated}
-              />
-            )}
-          </View>
+          {activeTab === 'notifications' && <NotificationsPlaceholderScreen />}
+
+          {activeTab === 'settings' && (
+            <AccessibilitySettingsScreen onBack={() => setActiveTab('feed')} />
+          )}
         </View>
 
-        {/* 2. TEKNOFEST Jüri Sunum Konsolu (Masaüstü/Sunum Modunda Yan Panel) */}
-        {Platform.OS === 'web' && (
-          <JuryConsole
-            onNavigateScreen={(screen) => setCurrentScreen(screen)}
-            onTriggerStruggle={() => engineRef.current?.simulateVisualStruggle()}
-            onTriggerSensory={() => engineRef.current?.simulateSensoryOverload()}
-            onTriggerHearing={() => engineRef.current?.simulateHearingNeed()}
-          />
-        )}
+        {/* Alt Gezinme Çubuğu (Bottom Navigation Bar) */}
+        <BottomNavBar
+          activeTab={activeTab}
+          onTabChange={(newTab) => setActiveTab(newTab)}
+        />
       </View>
-
-      {/* Erişilebilirlik ve Simülasyon Ayarları Modalı */}
-      <SettingsModal
-        visible={settingsVisible}
-        onClose={() => setSettingsVisible(false)}
-        onSimulateStruggle={() => engineRef.current?.simulateVisualStruggle()}
-        onSimulateSensory={() => engineRef.current?.simulateSensoryOverload()}
-        onSimulateHearing={() => engineRef.current?.simulateHearingNeed()}
-      />
     </SafeAreaView>
   );
 }
@@ -139,53 +149,55 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  outerContainer: {
     flex: 1,
-    backgroundColor: '#090D16', // Profesyonel koyu sahne arkaplanı
-  },
-  desktopLayout: {
-    flex: 1,
-    flexDirection: Platform.OS === 'web' ? 'row' : 'column',
+    backgroundColor: '#0F172A', // Sade, şık koyu sahne arkaplanı
     justifyContent: 'center',
     alignItems: 'center',
-    padding: Platform.OS === 'web' ? 16 : 0,
-    gap: 20,
   },
-  phoneFrame: {
+  deviceFrame: {
     width: Platform.OS === 'web' ? 440 : '100%',
     height: Platform.OS === 'web' ? '96vh' : '100%',
     maxHeight: Platform.OS === 'web' ? 880 : '100%',
     borderRadius: Platform.OS === 'web' ? 36 : 0,
     overflow: 'hidden',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.35,
-    shadowRadius: 28,
-    elevation: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.45,
+    shadowRadius: 32,
+    elevation: 16,
   },
-  notchContainer: {
+  topIslandBar: {
     alignItems: 'center',
-    paddingTop: 8,
+    paddingTop: 10,
     paddingBottom: 4,
     backgroundColor: 'transparent',
     zIndex: 10,
   },
-  dynamicIsland: {
-    width: 110,
-    height: 24,
+  islandPill: {
+    width: 100,
+    height: 22,
     backgroundColor: '#000000',
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-    paddingRight: 12,
+    borderRadius: 11,
   },
-  cameraHole: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#1E293B',
-  },
-  screenBody: {
+  tabContent: {
     flex: 1,
+  },
+  placeholderCenter: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 30,
+  },
+  placeholderTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    marginTop: 14,
+    marginBottom: 6,
+  },
+  placeholderSub: {
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });

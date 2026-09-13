@@ -1,184 +1,103 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useAccessibility, MODES } from '../context/AccessibilityContext';
-import { Eye, Volume2, Sparkles, SlidersHorizontal, PlusCircle } from 'lucide-react-native';
+import { Eye, Volume2, Sparkles, Sliders } from 'lucide-react-native';
 
-export const Header = ({ onOpenSettings, onOpenCreate, onNavigateHome }) => {
+export const Header = ({ onOpenAccessibility }) => {
   const { theme, currentMode } = useAccessibility();
   const colors = theme.colors;
+  const isHighContrast = theme.isHighContrast;
 
-  const getModeBadge = () => {
+  const getModeInfo = () => {
     switch (currentMode) {
       case MODES.VISUAL:
-        return { label: 'Görme Modu', icon: Eye, color: '#FFE600', textColor: '#000000' };
+        return { label: 'Görme', icon: Eye, color: '#FFE600', textColor: '#000000' };
       case MODES.HEARING:
-        return { label: 'İşitme Modu', icon: Volume2, color: '#38BDF8', textColor: '#000000' };
+        return { label: 'İşitme', icon: Volume2, color: '#38BDF8', textColor: '#000000' };
       case MODES.NEURO:
-        return { label: 'Sakin Mod', icon: Sparkles, color: '#0D9488', textColor: '#FFFFFF' };
+        return { label: 'Sakin', icon: Sparkles, color: '#0D9488', textColor: '#FFFFFF' };
       default:
-        return { label: 'Standart', icon: null, color: colors.border, textColor: colors.text };
+        return { label: 'Eşiksiz', icon: Sliders, color: colors.inputBg, textColor: colors.text };
     }
   };
 
-  const badge = getModeBadge();
-  const BadgeIcon = badge.icon;
+  const modeInfo = getModeInfo();
+  const ModeIcon = modeInfo.icon;
 
   return (
     <View
       style={[
-        styles.container,
+        styles.header,
         {
           backgroundColor: colors.cardBackground,
           borderBottomColor: colors.border,
-          borderBottomWidth: theme.isHighContrast ? 2 : 1,
+          borderBottomWidth: isHighContrast ? 2 : 1,
         },
       ]}
       accessible={true}
       accessibilityRole="header"
-      accessibilityLabel="NSosyal Eşiksiz Ana Başlık Alanı"
+      accessibilityLabel="NSosyal Ana Başlık"
     >
+      {/* Temiz NSosyal Logosu */}
+      <View style={styles.logoRow}>
+        <Text style={[styles.logoText, { color: isHighContrast ? '#FFE600' : '#2563EB' }]}>
+          N<Text style={{ color: isHighContrast ? '#FFFFFF' : '#0F172A' }}>Sosyal</Text>
+        </Text>
+      </View>
+
+      {/* Doğal Erişilebilirlik Hızlı Butonu */}
       <TouchableOpacity
-        onPress={onNavigateHome}
-        style={styles.logoRow}
+        onPress={onOpenAccessibility}
+        style={[
+          styles.quickModeBtn,
+          {
+            backgroundColor: modeInfo.color,
+            borderColor: isHighContrast ? '#FFE600' : colors.border,
+            borderWidth: isHighContrast ? 2 : 1,
+          },
+        ]}
         accessible={true}
         accessibilityRole="button"
-        accessibilityLabel="NSosyal Ana Sayfasına Git"
+        accessibilityLabel={`Erişilebilirlik ayarları. Aktif mod: ${modeInfo.label}`}
       >
-        <Text style={[styles.logoText, { color: theme.isHighContrast ? colors.primary : colors.text }]}>
-          N<Text style={{ color: theme.isHighContrast ? '#FFFFFF' : '#2563EB' }}>Sosyal</Text>
+        <ModeIcon size={16} color={modeInfo.textColor} />
+        <Text style={[styles.quickModeText, { color: modeInfo.textColor }]}>
+          {modeInfo.label}
         </Text>
-        <View
-          style={[
-            styles.tagBadge,
-            { backgroundColor: theme.isHighContrast ? '#FFE600' : '#DBEAFE' },
-          ]}
-        >
-          <Text
-            style={[
-              styles.tagText,
-              { color: theme.isHighContrast ? '#000000' : '#1E40AF' },
-            ]}
-          >
-            EŞİKSİZ
-          </Text>
-        </View>
       </TouchableOpacity>
-
-      <View style={styles.actionsRow}>
-        {/* Aktif Mod Rozeti */}
-        <TouchableOpacity
-          onPress={onOpenSettings}
-          style={[
-            styles.modeBadge,
-            {
-              backgroundColor: badge.color,
-              borderColor: theme.isHighContrast ? '#FFE600' : 'transparent',
-              borderWidth: theme.isHighContrast ? 2 : 0,
-            },
-          ]}
-          accessible={true}
-          accessibilityRole="button"
-          accessibilityLabel={`Aktif erişilebilirlik modu: ${badge.label}. Ayarları açmak için tıklayın.`}
-        >
-          {BadgeIcon && <BadgeIcon size={16} color={badge.textColor} style={{ marginRight: 4 }} />}
-          <Text style={[styles.modeBadgeText, { color: badge.textColor }]}>{badge.label}</Text>
-        </TouchableOpacity>
-
-        {/* Gönderi Paylaş Butonu */}
-        <TouchableOpacity
-          onPress={onOpenCreate}
-          style={[
-            styles.iconButton,
-            {
-              backgroundColor: theme.isHighContrast ? '#000000' : colors.primary,
-              borderColor: colors.border,
-              borderWidth: theme.isHighContrast ? 2 : 0,
-            },
-          ]}
-          accessible={true}
-          accessibilityRole="button"
-          accessibilityLabel="Yeni gönderi oluştur. Yapay zekâ alt metin desteği ile paylaşın."
-        >
-          <PlusCircle size={22} color={theme.isHighContrast ? '#FFE600' : '#FFFFFF'} />
-        </TouchableOpacity>
-
-        {/* Erişilebilirlik Ayarlar Butonu */}
-        <TouchableOpacity
-          onPress={onOpenSettings}
-          style={[
-            styles.iconButton,
-            {
-              backgroundColor: theme.isHighContrast ? '#FFE600' : colors.inputBg,
-              borderColor: colors.border,
-              borderWidth: theme.isHighContrast ? 2 : 1,
-            },
-          ]}
-          accessible={true}
-          accessibilityRole="button"
-          accessibilityLabel="Erişilebilirlik panelini ve modları aç"
-        >
-          <SlidersHorizontal
-            size={20}
-            color={theme.isHighContrast ? '#000000' : colors.text}
-          />
-        </TouchableOpacity>
-      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 16,
+  header: {
+    paddingHorizontal: 20,
     paddingVertical: 14,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    minHeight: 64, // WCAG Dokunma ve görünürlük alanı
+    minHeight: 60,
   },
   logoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 4,
   },
   logoText: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '800',
     letterSpacing: -0.5,
   },
-  tagBadge: {
-    marginLeft: 8,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  tagText: {
-    fontSize: 10,
-    fontWeight: '900',
-    letterSpacing: 0.5,
-  },
-  actionsRow: {
+  quickModeBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-  },
-  modeBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
     borderRadius: 20,
-    minHeight: 44, // WCAG 2.2 AA Dokunma Alanı (min 44px)
+    minHeight: 40,
   },
-  modeBadgeText: {
+  quickModeText: {
     fontSize: 12,
     fontWeight: '700',
-  },
-  iconButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });
