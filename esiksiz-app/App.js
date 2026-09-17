@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, View, SafeAreaView, Platform, StatusBar, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { AccessibilityProvider, useAccessibility, MODES } from './src/context/AccessibilityContext';
+import { StyleSheet, View, SafeAreaView, Platform, StatusBar, Text } from 'react-native';
+import { AccessibilityProvider, useAccessibility } from './src/context/AccessibilityContext';
 import { Header } from './src/components/Header';
 import { BottomNavBar } from './src/components/BottomNavBar';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
@@ -10,7 +10,7 @@ import { AccessibilitySettingsScreen } from './src/screens/AccessibilitySettings
 import { AdaptiveEngine } from './src/engine/AdaptiveEngine';
 import { SpeechService } from './src/services/speechService';
 import { INITIAL_POSTS } from './src/services/aiCaptionService';
-import { Compass, Bell, Wifi, Sparkles, Eye, Ear, HandMetal, LayoutGrid, RotateCcw } from 'lucide-react-native';
+import { Compass, Bell, Wifi } from 'lucide-react-native';
 
 function ExplorePlaceholderScreen() {
   const { theme } = useAccessibility();
@@ -42,83 +42,6 @@ function NotificationsPlaceholderScreen() {
   );
 }
 
-// Şık ve Doğal Kategori Seçici Barı
-function LiveModeBar({ onOpenOnboarding }) {
-  const { currentMode, selectMode, theme } = useAccessibility();
-  const isVisual = theme.isVisual;
-
-  const modes = [
-    { id: MODES.VISUAL, label: '🟡 Görme Desteği', icon: Eye },
-    { id: MODES.HEARING, label: '🤟 İşitme Desteği', icon: Ear },
-    { id: MODES.NEURO, label: '🧠 Sakin Mod', icon: Sparkles },
-    { id: MODES.MOTOR, label: '✋ Kolay Dokunma', icon: HandMetal },
-    { id: MODES.STANDARD, label: '🌐 Standart', icon: LayoutGrid },
-  ];
-
-  return (
-    <View style={[styles.liveModeContainer, { backgroundColor: isVisual ? '#0A0A0A' : '#F8FAFC', borderBottomColor: isVisual ? '#FFE600' : '#E2E8F0' }]}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.liveModeScroll}>
-        {modes.map((m) => {
-          const isCurrent = currentMode === m.id;
-          return (
-            <TouchableOpacity
-              key={m.id}
-              onPress={() => selectMode(m.id)}
-              style={[
-                styles.liveModeBtn,
-                {
-                  backgroundColor: isCurrent
-                    ? isVisual
-                      ? '#FFE600'
-                      : '#2563EB'
-                    : isVisual
-                    ? '#171717'
-                    : '#FFFFFF',
-                  borderColor: isCurrent ? (isVisual ? '#FFE600' : '#2563EB') : (isVisual ? '#333333' : '#E2E8F0'),
-                },
-              ]}
-              accessible={true}
-              accessibilityRole="button"
-              accessibilityLabel={`${m.label} moduna geç`}
-            >
-              <Text
-                style={[
-                  styles.liveModeBtnText,
-                  {
-                    color: isCurrent
-                      ? isVisual
-                        ? '#000000'
-                        : '#FFFFFF'
-                      : isVisual
-                      ? '#FFE600'
-                      : '#475569',
-                    fontWeight: isCurrent ? '800' : '600',
-                  },
-                ]}
-              >
-                {m.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-
-        {/* Karşılama Ekranına Dönüş Butonu */}
-        <TouchableOpacity
-          onPress={onOpenOnboarding}
-          style={[styles.onbResetBtn, { borderColor: isVisual ? '#FFE600' : '#CBD5E1' }]}
-          accessible={true}
-          accessibilityRole="button"
-          accessibilityLabel="Karşılama ekranına dön"
-        >
-          <RotateCcw size={12} color={isVisual ? '#FFE600' : '#64748B'} />
-          <Text style={[styles.onbResetText, { color: isVisual ? '#FFE600' : '#64748B' }]}>
-            Giriş
-          </Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </View>
-  );
-}
 
 function MainApp() {
   const { currentMode, selectMode, theme } = useAccessibility();
@@ -230,11 +153,7 @@ function MainApp() {
           <>
             {/* Üst Çubuk */}
             {activeTab !== 'settings' && activeTab !== 'create' && (
-              <>
-                <Header onOpenAccessibility={() => setActiveTab('settings')} />
-                {/* Mod Seçici Çubuğu */}
-                <LiveModeBar onOpenOnboarding={() => setIsOnboarding(true)} />
-              </>
+              <Header onOpenAccessibility={() => setActiveTab('settings')} />
             )}
 
             {/* Gövde */}
@@ -372,40 +291,7 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 1.5,
   },
-  liveModeContainer: {
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-  },
-  liveModeScroll: {
-    paddingHorizontal: 12,
-    gap: 6,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  liveModeBtn: {
-    paddingHorizontal: 11,
-    paddingVertical: 6,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  liveModeBtnText: {
-    fontSize: 11,
-  },
-  onbResetBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    marginLeft: 4,
-  },
-  onbResetText: {
-    fontSize: 10,
-    fontWeight: '700',
-  },
+
   tabBody: {
     flex: 1,
   },
