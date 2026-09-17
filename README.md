@@ -76,6 +76,7 @@ Tarayıcıda `http://localhost:8081` adresinde açılacak ve mobil çerçeve gö
 
 ## 📁 2. Aşama ve Sunum Dokümantasyonu (`docs/`)
 
+- [**`docs/NSosyal_Inovasyon_Yarismasi_Final_Sunumu.pdf`**](./docs/NSosyal_Inovasyon_Yarismasi_Final_Sunumu.pdf): **2026 NSosyal İnovasyon Yarışması Final Sunum Dosyası (16 Sayfa - PDF)**
 - [`docs/wcag_compliance_report.md`](./docs/wcag_compliance_report.md): WCAG 2.2 AA Detaylı Denetim Raporu ve Kontrast Matrisi
 - [`docs/usability_test_results.md`](./docs/usability_test_results.md): SUS Anketi Puanları ve Görev Tamamlama Metrikleri
 - [`docs/demo_presentation_guide.md`](./docs/demo_presentation_guide.md): 5-7 Dakikalık Jüri Canlı Sunum Senaryosu ve Demo Scripti
