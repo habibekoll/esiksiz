@@ -111,7 +111,7 @@ npm start
 
 ## 📁 Resmi Yarışma ve Sunum Dokümantasyonu
 
-- [**`NSosyal_Inovasyon_Yarismasi_Final_Sunumu.pdf`**](./NSosyal_Inovasyon_Yarismasi_Final_Sunumu.pdf): **2026 NSosyal İnovasyon Yarışması Resmi Final Sunum Dosyası (16 Sayfa - PDF)**
+- [**`5394536_Sinaps_Proje_Sunumu.pdf`**](./5394536_Sinaps_Proje_Sunumu.pdf): **2026 NSosyal İnovasyon Yarışması Resmi Final Sunum Dosyası (16 Sayfa - PDF)**
 - [**`Nsosyal İnovasyon Teknik Raporu.pdf`**](./Nsosyal%20İnovasyon%20Teknik%20Raporu.pdf): **1. Aşama 96 Puan Alan Resmi Proje Teknik Raporu (PDF)**
 - [`docs/wcag_compliance_report.md`](./docs/wcag_compliance_report.md): WCAG 2.2 AA Detaylı Denetim Raporu ve Kontrast Matrisi
 - [`docs/usability_test_results.md`](./docs/usability_test_results.md): SUS Anketi Puanları ve Görev Tamamlama Metrikleri
