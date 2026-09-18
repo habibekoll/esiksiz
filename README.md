@@ -122,5 +122,5 @@ npm start
 
 ## 👥 Takım Yapısı (SİNAPS - Takım ID: 1004069)
 
-- **Takım Kaptanı (Habibe Kol):** Proje yönetimi, kullanıcı araştırması, UI/UX tasarım kararları, rapor ve sunum.
-- **Takım Üyesi:** Teknik mimari, React Native bileşenleri, yapay zekâ hattı entegrasyonu ve test altyapısı.
+- **Takım Kaptanı (Habibe Kol):** Proje Yöneticisi & Yapay Zekâ / Sistem Mimarı (Bilgisayar Mühendisliği 3. Sınıf Öğrencisi)
+- **Takım Üyesi (Hümeyra Çapoğlu):** Arayüz Geliştirici (UI/UX) & Erişilebilirlik Uzmanı (Bilgisayar Mühendisliği 2. Sınıf Öğrencisi)
