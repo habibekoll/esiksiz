@@ -14,13 +14,29 @@ echo Sunucuyu durdurmak icin pencereyi kapatabilir veya Ctrl+C yapabilirsiniz.
 echo ===================================================
 echo.
 
-if exist "%~dp0esiksiz-app\dist" (
-    cd /d "%~dp0esiksiz-app\dist"
-    start "" cmd /c "timeout /t 2 >nul & start http://localhost:8085"
+cd /d "%~dp0esiksiz-app\dist"
+start "" cmd /c "timeout /t 2 >nul & start http://localhost:8085"
+
+where python >nul 2>&1
+if %errorlevel% equ 0 (
     python -m http.server 8085
-) else (
-    cd /d "%~dp0esiksiz-app"
-    npm run web
+    goto done
 )
+
+where py >nul 2>&1
+if %errorlevel% equ 0 (
+    py -m http.server 8085
+    goto done
+)
+
+where node >nul 2>&1
+if %errorlevel% equ 0 (
+    node server.js
+    goto done
+)
+
+powershell -NoProfile -ExecutionPolicy Bypass -File serve.ps1
+
+:done
 pause
 
